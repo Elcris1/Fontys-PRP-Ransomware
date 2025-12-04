@@ -1,4 +1,6 @@
 from cryptography.fernet import Fernet
+import os
+
 class CryptoGraphy:
     def __init__(self, fernet: Fernet = None, should_encrypt: bool = True, should_delete_original: bool = True):
         self.__fernet__ = fernet
@@ -21,7 +23,6 @@ class CryptoGraphy:
 
         if self.__should_delete_original__:
             pass
-            #import os
             #os.remove(filename)
 
         print(f"{filename} has been encrypted.")
@@ -42,7 +43,6 @@ class CryptoGraphy:
 
         if self.__should_delete_original__:
             pass
-            #import os
             #os.remove(encyrpted_filename)
 
         print(f"{encrypted_filename} has been decrypted to {output_filename}.")
