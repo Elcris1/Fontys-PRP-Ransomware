@@ -216,7 +216,7 @@ class Program():
                     self.decrypt()
 
                 case "deletetraces":
-                    self.__delete_traces()
+                    self.delete_traces()
 
                 case "exit" | "quit":
                     print("Exiting...")
