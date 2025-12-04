@@ -17,6 +17,43 @@ class Program():
         if self.__mode__ == "manual":
             self.__cli()
 
+    def __help(self):
+        print("Available commands:")
+        print("\thelp - show this help message")
+        print("\tgreet - print a greeting")
+        print("\tinfo - displays information about the ransomware")
+        print("\tchangeMode - changes the mode of operation")
+        print("\t\tDefault mode is 'manual'")
+        print("\t\tAvilable modes: auto, c2, manual")
+        print("\tenvcheck - checks the environment in which the program is running")
+        print("\tdirectory - discovers the files in the system avoiding specific file types and folders")
+        print("\t\tDefault is '/'")
+        print("\t\tExample: directory /Users/username/Documents")
+        print("\tsetup - sets up the cryptographic configuration")
+        print("\t\tOptions: ") 
+        print("\t\t\t--encrypt (enables encryption) ")
+        print("\t\t\t--delete (deletes files after encryption/decryption)")
+        print("\tencrypt - encrypts the discovered files")
+        print("\transomnote - displays the ransom note to the user")
+        print("\tdecrypt - decrypts the previously encrypted files")
+        print("\tdeletetraces - deletes traces of the program")
+        print("\texit or quit - quit the program")
+
+    def __info(self):
+        print("This code is a ransomware simulation tool made for educational purposes as part of a university research project.")
+        print("It is still able to encrypt files in your system, so be cautious when using it, specially in auto mode")
+                
+    def __change_mode(self, new_mode = "manual"):
+        self.__mode__ = new_mode
+        print(f"Mode changed to {self.__mode__}")
+        match self.__mode__:
+            case "auto":
+                print("Auto mode selected. The program will run without user interaction.")
+            case "c2":
+                print("C2 mode selected. The program will attempt to connect to a command and control server.")
+            case "manual":
+                print("Manual mode selected. The program will wait for user input.")
+                
     def __envcheck(self):
         import platform
 
@@ -112,39 +149,17 @@ class Program():
 
             match command:
                 case "help":
-                    print("Available commands:")
-                    print("\thelp - show this help message")
-                    print("\tgreet - print a greeting")
-                    print("\tinfo - displays information about the ransomware")
-                    print("\tchangeMode - changes the mode of operation")
-                    print("\t\tDefault mode is 'manual'")
-                    print("\t\tAvilable modes: auto, c2, manual")
-                    print("\tenvcheck - checks the environment in which the program is running")
-                    print("\tdirectory - discovers the files in the system avoiding specific file types and folders")
-                    print("\t\tDefault is '/'")
-                    print("\t\tExample: directory /Users/username/Documents")
-                    print("\tsetup - sets up the cryptographic configuration")
-                    print("\t\tOptions: ") 
-                    print("\t\t\t--encrypt (enables encryption) ")
-                    print("\t\t\t--delete (deletes files after encryption/decryption)")
-                    print("\tencrypt - encrypts the discovered files")
-                    print("\transomnote - displays the ransom note to the user")
-                    print("\tdecrypt - decrypts the previously encrypted files")
-                    print("\tdeletetraces - deletes traces of the program")
-                    print("\texit or quit - quit the program")
+                    self.__help()
 
                 case "greet":
                     print("Hello! This is your custom CLI.")
 
                 case "info":
-                    print("This code is a ransomware simulation tool made for educational purposes as part of a university research project.")
-                    print("It is still able to encrypt files in your system, so be cautious when using it, specially in auto mode")
-                
+                    self.__info()
+                    
                 case "changeMode":
-                    print("Mode changed (not really, this is a stub).")
                     if len(inp.split()) > 1 and inp.split()[1] in ["auto", "c2", "manual"]:
-                        self.__mode__ = inp.split()[1]
-                        print(f"New mode: {self.__mode__}")
+                        self.__change_mode(inp.split()[1])
                     else:
                         print("Mode not available. Available modes: auto, c2, manual")
 
