@@ -1,2 +1,5 @@
 __pycache__/
 .venv/
+discovered_info.json
+@README@.txt
+decryptor.py
