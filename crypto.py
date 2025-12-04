@@ -18,12 +18,11 @@ class CryptoGraphy:
 
         encrypted = self.__fernet__.encrypt(original)
 
-        with open(filename + ".enc", "wb") as encrypted_file:
+        with open(filename + ".ENCRYPTED", "wb") as encrypted_file:
             encrypted_file.write(encrypted)
 
         if self.__should_delete_original__:
-            pass
-            #os.remove(filename)
+            os.remove(filename)
 
         print(f"{filename} has been encrypted.")
 
@@ -36,14 +35,13 @@ class CryptoGraphy:
             encrypted = enc_file.read()
 
         decrypted = self.__fernet__.decrypt(encrypted)
-        output_filename = encrypted_filename.split(".enc")[0]
+        output_filename = encrypted_filename.split(".ENCRYPTED")[0]
 
         with open(output_filename, "wb") as dec_file:
             dec_file.write(decrypted)
 
         if self.__should_delete_original__:
-            pass
-            #os.remove(encyrpted_filename)
+            os.remove(encrypted_filename)
 
         print(f"{encrypted_filename} has been decrypted to {output_filename}.")
 
