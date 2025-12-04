@@ -1,0 +1,19 @@
+{
+    "targeted_extensions": [".txt", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".png", 
+    ".jpg", ".jpeg", ".pdf", ".sql", ".db", ".sqlite", ".frm", ".ibd", ".edb",
+    ".csv",  ".odt", ".rtf", ".mdb", ".accdb"
+    ],
+    "skipped_directories_general": ["android", "node_modules", "__pycache__", "venv",
+    "Google Drive", "Dropbox", "OneDrive", "ICloudDrive", "CloudStorage"
+    ],
+    "skipped_directories_Darwin": ["System", "Volumes", "cores", "etc", "opt", "bin", "sbin", "usr", "private",
+        "dev", "var", "tmp",
+        "Library", "Applications"
+    ],
+    "skipped_directories_Windows": ["Windows", "Program Files", "Program Files (x86)" , 
+    "Temp", "AppData", "$Recycle.Bin"
+    ],
+    "skipped_directories_Linux": ["proc", "sys", "dev", "run", "tmp", "var", "usr", "lib", "bin", "sbin", "etc",
+    "opt", "boot", "mnt", "media", "lost+found", "lib64", "snap", "run"
+    ]
+}
