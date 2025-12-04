@@ -1,0 +1,11 @@
+ALERT YOUR SYSTEM HAS BEEN ENCRYPTED BY: educational ransomware
+
+----------------------------------------------------------------
+
+To recover your files you must:
+- bla bla bla
+- bla bla bla
+
+Then you will be able to execute the decryptor
+
+----------------------------------------------------------------
