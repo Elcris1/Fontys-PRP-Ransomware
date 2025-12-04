@@ -11,7 +11,7 @@
         "Library", "Applications"
     ],
     "skipped_directories_Windows": ["Windows", "Program Files", "Program Files (x86)" , 
-    "Temp", "AppData", "$Recycle.Bin", "ProgramData"
+    "Temp", "AppData", "$Recycle.Bin", "ProgramData", "$WinREAgent"
     ],
     "skipped_directories_Linux": ["proc", "sys", "dev", "run", "tmp", "var", "usr", "lib", "bin", "sbin", "etc",
     "opt", "boot", "mnt", "media", "lost+found", "lib64", "snap", "run"
