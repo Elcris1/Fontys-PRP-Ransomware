@@ -29,14 +29,6 @@ class Program():
 
 
 
-        # import sys
-
-        # print("Python Version:", sys.version)
-        # print("Executable:", sys.executable)
-        # print("Install Prefix:", sys.prefix)
-
-
-
     def __directory(self, start_path="/", skipped_folders=None, targeted_extensions=None):
         import json
         with open("conf.json", "r") as conf_file:
@@ -46,15 +38,9 @@ class Program():
             general = data.get("skipped_directories_general", [])
             folders = data.get("skipped_directories_" + self.__system__, [])
             skipped_folders = general + folders
-            # skipped_folders = ["System", "Volumes", "cores", "etc", "opt", "bin", "sbin", "usr", "private",
-            # "dev", "var", "tmp",
-            # "Library", "Applications", 
-            # "android" , "node_modules", "__pycache__", "venv"
-            # ]
 
         if targeted_extensions is None:
             targeted_extensions = data.get("targeted_extensions", [])
-            #targeted_extensions = {".txt", ".doc", ".docx", ".xls", ".xlsx", ".png", ".jpg", ".jpeg", ".pdf"}
 
         self.__found_files = []
         self.__directories_with_files = []
@@ -71,7 +57,6 @@ class Program():
 
             for f in files:
                 self.__found_files.append(os.path.join(root, f))
-            #     print(f"  [FILE] {os.path.join(root, f)}")
 
         print(self.__directories_with_files)
         print(f"Total files found: {len(self.__found_files)}")
