@@ -206,7 +206,7 @@ class Program():
         with open("decrypt.py", "r") as decryptor_file:
             script_content = decryptor_file.read()
 
-        content = content.replace("#added_line_script", f"os.chdir(r'{cwd}')")
+        content = content.replace("#added_line_script", f'os.chdir(r\"{cwd.replace("\\", "/")}\")')
         
         with open(path, "w") as decryptor_file:
             decryptor_file.write(content)
