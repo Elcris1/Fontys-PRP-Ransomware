@@ -151,7 +151,9 @@ class Program():
         if self.__system__ == "Windows":
             import sys
             current_dir = os.path.dirname(os.path.abspath(__file__))
+            print("Current dir is: " + current_dir)
             if current_dir not in sys.path:
+                print("Adding " + current_dir + " to sys.path")
                 sys.path.append(current_dir)
 
         for dir in self.__directories_with_files:
