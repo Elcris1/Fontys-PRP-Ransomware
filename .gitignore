@@ -3,3 +3,4 @@ __pycache__/
 discovered_info.json
 @README@.txt
 decryptor.py
+secret.key
