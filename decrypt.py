@@ -5,7 +5,7 @@ if __name__ == "__main__":
     # decrypt_file("mock files/a.txt", "mock files/a.txt", fernet)
     import os
     import platform 
-    from main import Program
+
     import json
 
     system = platform.system()
@@ -13,9 +13,11 @@ if __name__ == "__main__":
 
     # since windows does not support syslink we need to change the working directory
     if system == "Windows":
+        import sys
         cwd = os.getcwd()
         #added_line_script
         os.chdir(cwd)
+        sys.path.append(cwd)
         base = cwd
 
     path = os.path.join(base, "discovered_info.json")
@@ -24,7 +26,7 @@ if __name__ == "__main__":
         data = json.load(conf_file)
         print(data)
 
-
+    from main import Program
     program = Program(data=data, mode="auto", system=platform.system())
     program.load_key()
     program.decrypt()

