@@ -16,8 +16,13 @@ class Program():
     def start(self):
         print("This is the ransomware main module.")
         print("What would you like to do?")
-        if self.__mode__ == "manual":
-            self.__cli()
+        match self.__mode__:
+            case "auto":
+                self.__auto_mode()
+            case "manual":
+                self.__cli()
+            case "c2":
+                print("C2 mode is not yet implemented.")
 
     def __help(self):
         print("Available commands:")
@@ -291,5 +296,10 @@ class Program():
         return self.__criptography.load_key(key_filename)
 
 if __name__ == "__main__":
-    program = Program()
+    #TODO: mode 1st parameter of execution
+    import sys
+    mode = "manual"
+    if len(sys.argv) > 1:
+        mode = sys.argv[1]
+    program = Program(mode=mode)
     program.start()
