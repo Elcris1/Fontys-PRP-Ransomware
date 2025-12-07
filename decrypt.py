@@ -34,6 +34,6 @@ if __name__ == "__main__":
     from main import Program
 
     program = Program(data=data, mode="auto", system=platform.system())
-    program.load_key()
+    program.load_key(base + "/secret.key")
     program.decrypt()
     program.delete_traces()

