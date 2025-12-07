@@ -170,8 +170,10 @@ class Program():
         except OSError:
             # Windows does not support symlinks without admin privileges
             # So we copy the file instead changing the working directory of it
+
+            #os.chdir(r\"{cwd.replace("\\", "/")}\")
         
-            content = script_content.replace("#added_line_script", f"os.chdir('{cwd}')")
+            content = script_content.replace("#added_line_script", f"os.chdir(r'{cwd}')")
     
             with open(path, "w") as decryptor_file:
                 decryptor_file.write(content)
