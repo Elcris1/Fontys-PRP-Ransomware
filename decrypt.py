@@ -30,7 +30,7 @@ if __name__ == "__main__":
     #     importlib.import_module("cryptography")
     # except ImportError:
     #     import subprocess
-    #     subprocess.call([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
+    #     subprocess.run([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
     from main import Program
 
     program = Program(data=data, mode="auto", system=platform.system())

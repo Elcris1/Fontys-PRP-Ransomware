@@ -228,6 +228,7 @@ class Program():
                     self.__info()
                     
                 case "changeMode":
+                    print(inp.split()[1])
                     if len(inp.split()) > 1 and inp.split()[1] in ["auto", "c2", "manual"]:
                         self.__change_mode(inp.split()[1])
                     else:
