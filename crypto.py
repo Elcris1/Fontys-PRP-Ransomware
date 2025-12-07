@@ -57,5 +57,6 @@ class CryptoGraphy:
     def load_key(self, key_filename: str = "secret.key"):
         with open(key_filename, "rb") as key_file:
             key = key_file.read()
-            print(key)
+            
         self.__fernet__ = Fernet(key)
+        return key
