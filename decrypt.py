@@ -24,13 +24,13 @@ if __name__ == "__main__":
     with open(path, "r") as conf_file:
         data = json.load(conf_file)
 
-    # This could be interesting in the future to auto install dependencies
-    #import importlib
-    # try:
-    #     importlib.import_module("cryptography")
-    # except ImportError:
-    #     import subprocess
-    #     subprocess.run([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
+
+    import importlib
+    try:
+        importlib.import_module("cryptography")
+    except ImportError:
+        import subprocess
+        subprocess.run([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
     from main import Program
 
     program = Program(data=data, mode="auto", system=platform.system())
