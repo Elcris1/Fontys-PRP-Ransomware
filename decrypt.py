@@ -4,13 +4,21 @@ if __name__ == "__main__":
     # fernet = Fernet(key)
     # decrypt_file("mock files/a.txt", "mock files/a.txt", fernet)
     import os
-    import platform
-    #added_line_script
+    import platform 
     from main import Program
     import json
 
-    BASE = os.path.dirname(os.path.realpath(__file__))
-    path = os.path.join(BASE, "discovered_info.json")
+    system = platform.system()
+    base = os.path.dirname(os.path.realpath(__file__))
+
+    # since windows does not support syslink we need to change the working directory
+    if system == "Windows":
+        cwd = os.getcwd()
+        #added_line_script
+        os.chdir(cwd)
+        base = cwd
+
+    path = os.path.join(base, "discovered_info.json")
 
     with open(path, "r") as conf_file:
         data = json.load(conf_file)

