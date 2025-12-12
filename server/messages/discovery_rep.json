@@ -1,0 +1,7 @@
+{
+    "type": "discovery_rep",
+    "data": {
+        "files_found": 10,
+        "directories": 2
+    }
+}
