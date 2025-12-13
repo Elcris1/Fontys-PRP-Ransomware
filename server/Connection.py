@@ -18,6 +18,7 @@ class Connection:
     def __init__(self, uri, socket: websockets.ServerConnection):
         self.uri = uri
         self.username = None
+        self.system_info = None
         self.websocket = socket
         self.state: ConnectionState = ConnectionState.CONNECTED
         self.__key = None
@@ -26,6 +27,9 @@ class Connection:
 
     def set_username(self, username):
         self.username = username
+
+    def set_system_info(self, info):
+        self.system_info = info
 
     def change_state(self, new_state: ConnectionState):
         self.state = new_state
@@ -40,11 +44,13 @@ class Connection:
         await self.websocket.send(message)
 
     async def start(self):
+        """Start listening and managing messages from the client."""
         try:
             async for message in self.websocket:
+                #TODO: remove this line in the future
                 print(f"[{self.username}] {message}")
         except websockets.exceptions.ConnectionClosed:
-            print("Connection closed by the server.")
+            print("Connection closed by the client.")
 
     def show_info(self):
-        pass
+        print(f"Connection info:\n- URI: {self.uri}\n- Username: {self.username}\n- State: {self.state.name}\n- Paid: {self.is_paid}\n- Key: {self.__key}")
