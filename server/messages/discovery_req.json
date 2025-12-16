@@ -1,0 +1,6 @@
+{
+    "type": "discovery_req",
+    "data": {
+        "initial_directory": "/"
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "type": "crypto_req",
+    "data": {
+        "encrypt": "true|false",
+        "delete": "true|false"
+    }
+}

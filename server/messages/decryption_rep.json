@@ -1,0 +1,6 @@
+{
+    "type": "decryption_rep",
+    "data": {
+        "status": "true|false"
+    }
+}

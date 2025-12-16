@@ -25,6 +25,10 @@ if __name__ == "__main__":
         data = json.load(conf_file)
 
 
+    if "c2" in data.values():
+        pass
+
+
     import importlib
     try:
         importlib.import_module("cryptography")

@@ -1,0 +1,7 @@
+{
+    "type": "auth_req",
+    "data": {
+        "username": "user123",
+        "system": "Windows|Darwin|Linux"
+    }
+}
