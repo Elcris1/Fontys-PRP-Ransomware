@@ -79,7 +79,7 @@ class WebSocketCLIServer:
         reply = {
             "type": "auth_rep",
             "data": {
-                "status": "accepted" if status else "rejected",
+                "status": status,
                 "message": "Authentication successful." if status else "Authentication failed."
             }
         }
@@ -266,7 +266,7 @@ class WebSocketCLIServer:
         message = {
             "type": "decryption_rep",
             "data": {
-                "status": "accepted" if value else "rejected",
+                "status": value,
             }
         }
 

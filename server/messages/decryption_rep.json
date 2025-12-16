@@ -1,6 +1,6 @@
 {
     "type": "decryption_rep",
     "data": {
-        "status": "accepted|rejected"
+        "status": "true|false"
     }
 }

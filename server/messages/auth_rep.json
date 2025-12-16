@@ -1,7 +1,7 @@
 {
     "type": "auth_rep",
     "data": {
-        "status": "accepted|rejected",
+        "status": "true|false",
         "message": "Authentication successful."
     }
 }
