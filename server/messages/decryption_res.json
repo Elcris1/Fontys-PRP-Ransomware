@@ -1,4 +1,6 @@
 {
     "type": "decryption_res",
-    "data": {}
+    "data": {
+        "result": "true|false"
+    }
 }

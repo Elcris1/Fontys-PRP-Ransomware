@@ -90,7 +90,7 @@ class WebSocketCLIServer:
         loop = asyncio.get_event_loop()
         while self.__should_cli_run:
 
-            msg = await loop.run_in_executor(None, input, f"{self.__generate_cli_text()}> ")
+            msg = await loop.run_in_executor(None, input, f"{self.__generate_cli_text()}")
             match msg.split():
                 case ["help"]:
                     self.__show_help()
@@ -144,7 +144,7 @@ class WebSocketCLIServer:
         cli_text = "CLI"
         if self.__selected_client:
             cli_text += f"({self.__selected_client.username})"
-        return cli_text
+        return cli_text + "> "
     
     def __show_help(self):
         """Display available CLI commands."""
@@ -207,8 +207,6 @@ class WebSocketCLIServer:
                 return func(self, *args, **kwargs)
             return wrapper
         
-    
-    
     
     @check_selected_client
     def __show_connection_info(self):
