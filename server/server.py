@@ -326,5 +326,10 @@ class WebSocketCLIServer:
 
 
 if __name__ == "__main__":
-    server = WebSocketCLIServer()
+    from dotenv import load_dotenv
+    import os 
+    load_dotenv()
+    host = os.getenv("HOST" || "localhost")
+    port = int(os.getenv("PORT" || "8765"))
+    server = WebSocketCLIServer(host = host, port = port)
     asyncio.run(server.start())

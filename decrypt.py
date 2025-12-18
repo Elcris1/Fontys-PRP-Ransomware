@@ -25,6 +25,7 @@ if __name__ == "__main__":
         data = json.load(conf_file)
 
 
+    # TODO: handle c2 mode
     if "c2" in data.values():
         pass
 

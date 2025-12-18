@@ -120,6 +120,7 @@ class Program():
             for f in files:
                 self.__found_files.append(os.path.join(root, f))
 
+        #TODO: add mode to discovered_info.json
         with open("discovered_info.json", "w") as output_file:
             json.dump({
                 "found_files": self.__found_files,
@@ -296,10 +297,11 @@ class Program():
         return self.__criptography.load_key(key_filename)
 
 if __name__ == "__main__":
-    #TODO: mode 1st parameter of execution
-    import sys
-    mode = "manual"
-    if len(sys.argv) > 1:
-        mode = sys.argv[1]
+    import os
+    from dotenv import load_dotenv
+    
+    load_dotenv()
+    mode = os.getenv("MODE", "manual")
+
     program = Program(mode=mode)
-    program.start()
+    program.start() 
