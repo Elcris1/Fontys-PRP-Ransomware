@@ -13,6 +13,6 @@ This is a ransomware simulation tool made for educational purposes as part of a 
 Unauthorized deployment of ransomware or ransomware-like software may be illegal in your jurisdiction.
 
 ## License
-This project is licensed under the MIT License - see the **[MIT LICENSE]**(LICENSE) file for details.
+This project is licensed under the MIT License - see the [MIT LICENSE](LICENSE) file for details.
 
 
