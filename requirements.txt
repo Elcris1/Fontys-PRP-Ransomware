@@ -1,2 +1,3 @@
 cryptography
 websockets
+python-dotenv
