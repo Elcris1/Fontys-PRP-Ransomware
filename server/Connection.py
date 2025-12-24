@@ -23,6 +23,7 @@ class Connection:
         self.system_info = None
         self.websocket = socket
         self.state: ConnectionState = ConnectionState.CONNECTED
+        self.id = None
         self.__key = None
         self.is_paid = False
         self.__selected_client = None
@@ -38,6 +39,9 @@ class Connection:
 
     def change_state(self, new_state: ConnectionState):
         self.state = new_state
+
+    def set_id(self, id: str):
+        self.id = id
 
     def set_key(self, key: bytes):
         self.__key = key

@@ -124,7 +124,8 @@ class Program():
         with open("discovered_info.json", "w") as output_file:
             json.dump({
                 "found_files": self.__found_files,
-                "directories_with_files": self.__directories_with_files
+                "directories_with_files": self.__directories_with_files,
+                "mode": self.__mode
             }, output_file, indent=4)
 
         print(self.__directories_with_files)

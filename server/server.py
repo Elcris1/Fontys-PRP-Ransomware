@@ -3,6 +3,7 @@ import websockets
 import json
 import inspect
 from Connection import Connection, ConnectionState
+import uuid
 
 class WebSocketCLIServer:
     def __init__(self, host="localhost", port=8765):
@@ -29,15 +30,29 @@ class WebSocketCLIServer:
             # If username already exists, append a number to make it unique
             if username in self.connected_clients:
                 username += str(len([x for x in self.connected_clients.keys() if x.startswith(username)])+1)
-            
-            # Create connection object
-            connection = Connection(uri=websocket.remote_address, socket=websocket)
-            connection.set_username(username)
-            connection.change_state(ConnectionState.IDENTIFIED)
-            connection.set_system_info(json.loads(first_message).get("data", {}).get("system", "Unknown"))
-            self.connected_clients[username] = connection
 
-            await websocket.send(self.__create_auth_reply(True))
+            connection = Connection(uri=websocket.remote_address, socket=websocket)
+            data = json.loads(first_message).get("data", {})
+            token = data.get("id", None)
+            find: list[Connection] = [x for x in self.connected_clients.values() if x.id == token] # if token is not None else []
+            if len(find) > 0:
+                # This means the client had previously authenticated
+                connection = find[0]
+                connection.websocket = websocket
+                connection.uri = websocket.remote_address
+                username = connection.username
+               
+            else:
+                # Set data in the connection object
+                token = uuid.uuid4().hex
+                connection.set_id(token)
+                self.connected_clients[username] = connection
+
+            connection.change_state(ConnectionState.IDENTIFIED)
+            connection.set_username(username)
+            connection.set_system_info(data.get("system", "Unknown"))
+
+            await websocket.send(self.__create_auth_reply(True, token))
             print(f"[{username}] is connected to the server.")
             print(self.__generate_cli_text() + "> ", end='', flush=True)
 
@@ -50,7 +65,7 @@ class WebSocketCLIServer:
             pass
         finally:
             if websocket in [conn.websocket for conn in self.connected_clients.values()]:
-                print(f"[{username}] has been disconnected left")
+                print(f"[{username}] has been disconnected")
                 self.connected_clients[username].change_state(ConnectionState.DISCONNECTED)
                 #del self.connected_clients[websocket]
 
@@ -74,13 +89,14 @@ class WebSocketCLIServer:
         except json.JSONDecodeError:
             return False
 
-    def __create_auth_reply(self, status: bool) -> str:
+    def __create_auth_reply(self, status: bool, token: str = "") -> str:
         """Create an authentication reply message."""
         reply = {
             "type": "auth_rep",
             "data": {
                 "status": status,
-                "message": "Authentication successful." if status else "Authentication failed."
+                "message": "Authentication successful." if status else "Authentication failed.",
+                "id": token
             }
         }
         return json.dumps(reply)
@@ -329,7 +345,7 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     import os 
     load_dotenv()
-    host = os.getenv("HOST" || "localhost")
-    port = int(os.getenv("PORT" || "8765"))
+    host = os.getenv("HOST", "localhost")
+    port = int(os.getenv("PORT", "8765"))
     server = WebSocketCLIServer(host = host, port = port)
     asyncio.run(server.start())

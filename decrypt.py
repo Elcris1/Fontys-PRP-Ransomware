@@ -26,8 +26,12 @@ if __name__ == "__main__":
 
 
     # TODO: handle c2 mode
-    if "c2" in data.values():
-        pass
+    if data["mode"] == "c2":
+        # Send Decryption request to C2.
+        # A good way to identify the system is to create a unique identifier 
+        # This unique identifier is handler by the server and sent when authenticated
+        # Use that to understand requests.
+        pass 
 
 
     import importlib
