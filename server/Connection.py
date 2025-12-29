@@ -126,4 +126,4 @@ class Connection:
             self.change_state(ConnectionState.DECRYPTED)
 
     def show_info(self):
-        print(f"Connection info:\n- URI: {self.uri}\n- Username: {self.username}\n- State: {self.state.name}\n- Paid: {self.is_paid}\n- Key: {self.__key}\n- Files Scanned: {self.__files_scanned}\n- Directories Scanned: {self.__directories_scanned}")
+        print(f"Connection info:\n- URI: {self.uri}\n- Username: {self.username}\n- State: {self.state.name}\n- Id: {self.id}\n- Paid: {self.is_paid}\n- Key: {self.__key}\n- Files Scanned: {self.__files_scanned}\n- Directories Scanned: {self.__directories_scanned}")

