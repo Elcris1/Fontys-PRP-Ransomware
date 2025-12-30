@@ -68,6 +68,9 @@ class WebSocketCLIServer:
                 print(f"[{username}] has been disconnected")
                 self.connected_clients[username].change_state(ConnectionState.DISCONNECTED)
                 #TODO: unselect the client if it was selected
+                if self.__selected_client == self.connected_clients[username]:
+                    self.__selected_client = None
+                    self.__generate_cli_text()
                 #del self.connected_clients[websocket]
 
     def __check_first_message(self, message) -> str:
@@ -286,6 +289,7 @@ class WebSocketCLIServer:
             "type": "decryption_rep",
             "data": {
                 "status": value,
+                "key": self.__selected_client.get_key() if value and self.__selected_client.get_key() is not None else ""
             }
         }
 
