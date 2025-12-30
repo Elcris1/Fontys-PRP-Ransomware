@@ -67,6 +67,7 @@ class WebSocketCLIServer:
             if websocket in [conn.websocket for conn in self.connected_clients.values()]:
                 print(f"[{username}] has been disconnected")
                 self.connected_clients[username].change_state(ConnectionState.DISCONNECTED)
+                #TODO: unselect the client if it was selected
                 #del self.connected_clients[websocket]
 
     def __check_first_message(self, message) -> str:
