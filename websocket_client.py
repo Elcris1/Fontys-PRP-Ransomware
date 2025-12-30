@@ -65,14 +65,10 @@ class WebsocketClient:
             print(f"\n[Server]: {message}")
             reply = self.handler(json.loads(message))
             if reply is not None:
-                await self.__websocket.send(json.dumps(reply))
+                await self.send_message(reply)
 
     async def send_decryption_req(self):
         """Sends a decryption request to the server."""
-        if self.__websocket is None:
-            print("Websocket is not connected.")
-            return
-        
         #TODO: Finish this
         data = {
             "type": "decryption_req",
@@ -80,5 +76,13 @@ class WebsocketClient:
                 "id": self.id
             }
         }
-        await self.__websocket.send(json.dumps(data))
+        await self.send_message(data)
+
+    async def send_message(self, message: dict):
+        """Sends a generic message to the server."""
+        if self.__websocket is None:
+            print("Websocket is not connected.")
+            return
+        
+        await self.__websocket.send(json.dumps(message))
 
