@@ -45,6 +45,9 @@ class Connection:
 
     def set_key(self, key: bytes):
         self.__key = key
+        
+    def get_key(self) -> bytes:
+        return self.__key
 
     def set_payment_status(self, status: bool):
         self.is_paid = status
