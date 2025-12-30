@@ -65,3 +65,7 @@ class CryptoGraphy:
             
         self.__fernet__ = Fernet(self.key)
         return self.key
+    
+    def set_key(self, key: bytes):
+        self.key = key
+        self.__fernet__ = Fernet(self.key)
