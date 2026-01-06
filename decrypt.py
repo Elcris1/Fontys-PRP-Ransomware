@@ -1,6 +1,4 @@
 import asyncio
-from main import Program
-import threading
 import platform 
 
 async def c2_mode(data):
@@ -17,6 +15,9 @@ async def c2_mode(data):
 
     # Now safe to send request
     await program.send_decryption_request()
+
+    # wait for decryption
+    await program.decrypted.wait()
 
     # Optional: stop the program
     await program.stop()
@@ -44,6 +45,7 @@ if __name__ == "__main__":
 
     with open(path, "r") as conf_file:
         data = json.load(conf_file)
+    from main import Program
 
     import importlib
     try:

