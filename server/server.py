@@ -37,7 +37,7 @@ class WebSocketCLIServer:
             find: list[Connection] = [x for x in self.connected_clients.values() if x.id == token] # if token is not None else []
             if len(find) > 0:
                 # This means the client had previously authenticated
-                connection = find[0]
+                connection = find[len(find)-1]
                 connection.websocket = websocket
                 connection.uri = websocket.remote_address
                 username = connection.username
@@ -56,9 +56,6 @@ class WebSocketCLIServer:
             print(f"[{username}] is connected to the server.")
             print(self.__generate_cli_text(), end='', flush=True)
 
-            # async for message in websocket:
-            #     print(f"[{username}] {message}")
-            #     await self.broadcast(f"[{username}] {message}", sender=websocket)
             await connection.start()
 
         except websockets.exceptions.ConnectionClosed:
@@ -67,11 +64,9 @@ class WebSocketCLIServer:
             if websocket in [conn.websocket for conn in self.connected_clients.values()]:
                 print(f"[{username}] has been disconnected")
                 self.connected_clients[username].change_state(ConnectionState.DISCONNECTED)
-                #TODO: unselect the client if it was selected
                 if self.__selected_client == self.connected_clients[username]:
                     self.__selected_client = None
                     self.__generate_cli_text()
-                #del self.connected_clients[websocket]
 
     def __check_first_message(self, message) -> str:
         """Check if the first message is a valid username."""

