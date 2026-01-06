@@ -41,6 +41,7 @@ class WebSocketCLIServer:
                 connection.websocket = websocket
                 connection.uri = websocket.remote_address
                 username = connection.username
+                connection.show_info()
                
             else:
                 # Set data in the connection object
