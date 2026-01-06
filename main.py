@@ -379,7 +379,7 @@ class Program():
                             should_delete_original=True,
                             c2_mode=True
                         )
-                    self.__criptography.set_key(key.encode())
+                    self.__criptography.set_key(key)
                     result = self.decrypt()
 
                 message_reply["type"] = "decryption_res"
