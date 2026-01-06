@@ -146,7 +146,7 @@ class Program():
             json.dump({
                 "found_files": self.__found_files,
                 "directories_with_files": self.__directories_with_files,
-                "mode": self.__mode,
+                "mode": self.__mode__,
                 "id": self.__id
             }, output_file, indent=4)
 
