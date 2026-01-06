@@ -67,13 +67,17 @@ class WebsocketClient:
             if reply is not None:
                 await self.send_message(reply)
 
+    async def stop(self):
+        """Closes the websocket connection."""
+        if self.__websocket is not None:
+            await self.__websocket.close()
+            self.__websocket = None
+
     async def send_decryption_req(self):
         """Sends a decryption request to the server."""
-        #TODO: Finish this
         data = {
             "type": "decryption_req",
             "data": {
-                "id": self.id
             }
         }
         await self.send_message(data)

