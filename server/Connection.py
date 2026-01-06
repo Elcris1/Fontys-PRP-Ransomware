@@ -118,7 +118,7 @@ class Connection:
         reply = {
             "type": "decryption_rep",
             "data": {
-                "status": "accepted" if self.is_paid else "rejected",
+                "status": self.is_paid,
             }
         }
         await self.send_message(json.dumps(reply))
