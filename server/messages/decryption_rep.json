@@ -1,6 +1,7 @@
 {
     "type": "decryption_rep",
     "data": {
-        "status": "true|false"
+        "status": "true|false",
+        "key": "bXlfc2VjcmV0X2tleV9ieXRlcw=="
     }
 }

