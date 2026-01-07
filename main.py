@@ -327,7 +327,8 @@ class Program():
         self.__envcheck()
         self.__client = WebsocketClient(username=self.__system__, 
                         system=self.__system__, 
-                        handler=self.__message_handler)
+                        handler=self.__message_handler,
+                        id=self.__id)
         await self.__client.connect()
 
     def __message_handler(self, message: dict):

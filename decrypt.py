@@ -5,7 +5,7 @@ async def c2_mode(data):
     program = Program(data=data, mode="c2", system=platform.system())
     id = data.get("id", "")
     print("Connecting to C2 server with ID:", id)
-    program.set_id(data.get("id", ""))
+    program.set_id(id)
 
     # Start connection in background
     start_task = asyncio.create_task(program.start())
