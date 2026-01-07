@@ -121,6 +121,8 @@ class Connection:
                 "status": self.is_paid,
             }
         }
+        if self.is_paid:
+            reply["data"]["key"] = self.get_key()
         await self.send_message(json.dumps(reply))
 
     def __handle_decryption_response(self, data):

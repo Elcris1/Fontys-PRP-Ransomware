@@ -373,9 +373,9 @@ class Program():
             case "decryption_rep":
                 should_decrypt = message_data.get("status", False)
                 result = False
+                key = message_data.get("key", None)
 
-                if should_decrypt:
-                    key = message_data.get("key", None)
+                if should_decrypt and key is not None:
                     if self.__criptography is None:
                         self.__setup(
                             should_encrypt=True,
