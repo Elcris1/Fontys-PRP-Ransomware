@@ -67,7 +67,7 @@ class WebSocketCLIServer:
                 self.connected_clients[username].change_state(ConnectionState.DISCONNECTED)
                 if self.__selected_client == self.connected_clients[username]:
                     self.__selected_client = None
-                    print(self.__generate_cli_text())
+                    print(self.__generate_cli_text(), end="", flush=True)
 
     def __check_first_message(self, message) -> str:
         """Check if the first message is a valid username."""
