@@ -46,7 +46,7 @@ class Program():
         print("Available commands:")
         print("\thelp - show this help message")
         print("\tgreet - print a greeting")
-        print("\tinfo - displays information about the ransomware")
+        #print("\tinfo - displays information about the ransomware")
         print("\tchangeMode - changes the mode of operation")
         print("\t\tDefault mode is 'manual'")
         print("\t\tAvilable modes: auto, c2, manual")
@@ -62,7 +62,7 @@ class Program():
         print("\transomnote - displays the ransom note to the user")
         print("\tdecrypt - decrypts the previously encrypted files")
         print("\tdeletetraces - deletes traces of the program")
-        print("\ttestfunc - runs the function to be tested")
+        #print("\ttestfunc - runs the function to be tested")
         print("\texit or quit - quit the program")
 
     def __info(self):
@@ -259,8 +259,8 @@ class Program():
                 case "help":
                     self.__help()
 
-                case "greet":
-                    print("Hello! This is your custom CLI.")
+                # case "greet":
+                #     print("Hello! This is your custom CLI.")
 
                 case "info":
                     self.__info()
@@ -298,6 +298,7 @@ class Program():
 
                 case "deletetraces":
                     self.delete_traces()
+                    
                 case "testfunc":
                     print("Running test function...")
                     self.__test_function("mock files/decryptor_test.py")
