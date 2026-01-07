@@ -26,7 +26,7 @@ class Program():
             case "auto":
                 self.__auto_mode()
             case "manual":
-                print("What would you like to do?")
+                print("What would you like to do? Type help to see available commands.")
                 await self.__cli()
             case "c2":
                 await self.__c2_mode()
