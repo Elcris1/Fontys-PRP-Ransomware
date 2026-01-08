@@ -85,14 +85,17 @@ class Program():
             case "auto":
                 print("Auto mode selected. The program will run without user interaction.")
                 self.__should_cli_run = False
+                self.__mode__ = new_mode
                 self.__auto_mode()
             case "c2":
                 print("C2 mode selected. The program will attempt to connect to a command and control server.")
                 self.__should_cli_run = False
+                self.__mode__ = new_mode
                 await self.__c2_mode()
             case "manual":
                 print("Manual mode selected. The program will wait for user input.")
                 if self.__mode__ != new_mode:
+                    self.__mode__ = new_mode
                     await self.__cli()
 
         self.__mode__ = new_mode
